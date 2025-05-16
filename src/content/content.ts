@@ -20,7 +20,7 @@ console.log('Content script loaded!');
 // 클래스와 data-set 속성으로 정확히 찾기
 function clickBurgerButton() {
   try {
-    const burgerButton = document.querySelector('div.category_button.bold.button[data-set="2"]');
+    const burgerButton = document.querySelector('div.category_button.bold.button[data-set="1"]');
 
     if (burgerButton) {
       console.log('버거 버튼 찾음:', burgerButton);

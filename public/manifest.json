@@ -11,8 +11,8 @@
       "service_worker": "background.js",
       "type": "module"
     },
-    "permissions": ["storage", "tabs", "activeTab", "scripting"],
-    "host_permissions": ["<all_urls>"],
+    "permissions": ["alarms", "storage", "tabs", "activeTab", "scripting"],
+    "host_permissions": ["https://openapi.vito.ai/*"],
     "content_scripts": [
       {
         "matches": ["<all_urls>"],
