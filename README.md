@@ -15,17 +15,18 @@
 pnpm install
 
 ## 3. 환경변수 설정
-프로젝트 루트에 .env 파일을 생성
-RTZR_CLIENT_ID=your_client_id_here
-RTZR_CLIENT_SECRET=your_client_secret_here
+프로젝트 루트에 .env 파일을 생성   
+RTZR_CLIENT_ID=your_client_id_here   
+RTZR_CLIENT_SECRET=your_client_secret_here   
 
 ## 4. protoc 설치
-mac / linux
+mac / linux   
+```bash
 brew install protobuf          # macOS Homebrew
 sudo apt-get update
 sudo apt-get install protobuf-compiler  # Ubuntu/Debian
-
-Windows
+```
+Windows   
 https://github.com/protocolbuffers/protobuf/releases 에서
 protoc-*-win64.zip 다운로드
 
@@ -40,10 +41,10 @@ extension-module/
 ## 5. gRPC-Web 스텁 생성
 protos/vito-stt-client.proto 파일을 기준으로, 메시지 타입과 서비스 클라이언트를 생성
 
-Windows
-pnpm run gen:proto:win
-macOS / Linux
-pnpm run gen:proto:unix
+Windows   
+pnpm run gen:proto:win   
+macOS / Linux   
+pnpm run gen:proto:unix   
 패키지 스크립트 예시 (package.json):
 ```bash
 "scripts": {
@@ -51,7 +52,7 @@ pnpm run gen:proto:unix
   "gen:proto:unix": "export PATH=$(pwd)/protoc/bin:$(pwd)/node_modules/.bin:$PATH && protoc --plugin=protoc-gen-js=protoc-gen-js --plugin=protoc-gen-grpc-web=protoc-gen-grpc-web --proto_path=protos --js_out=import_style=commonjs:src/proto --grpc-web_out=import_style=typescript,mode=grpcwebtext:src/proto protos/vito-stt-client.proto"
 }
 ```
-실행 후 src/proto/에 다음 파일들이 생성됩니다:
+실행 후 src/proto/에 다음 파일들이 생성됩니다:   
 
-vito-stt-client_pb.d.ts
-Vito-stt-clientServiceClientPb.ts
+vito-stt-client_pb.d.ts   
+Vito-stt-clientServiceClientPb.ts   
