@@ -41,10 +41,14 @@ class HtmlCapture {
     });
 
     // 클릭 이벤트 (데스크톱 환경용)
-    document.addEventListener('click', (): void => {
-      console.log('클릭 발생!');
-      this.getFullHTML();
-    });
+    // 클릭 이벤트 (데스크탑 환경용)
+  document.addEventListener('click', (e: MouseEvent): void => {
+    console.log('클릭 발생!');
+    console.log('클릭 좌표 (client):', e.clientX, e.clientY); // 뷰포트 기준 좌표
+    console.log('클릭 좌표 (page):', e.pageX, e.pageY);     // 문서 전체 기준 좌표
+    console.log('클릭 좌표 (screen):', e.screenX, e.screenY); // 모니터 기준 좌표
+    this.getFullHTML();
+  });
   }
 
   /**
