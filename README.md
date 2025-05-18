@@ -31,13 +31,12 @@ protoc-*-win64.zip 다운로드
 
 압축 해제 후 bin/protoc.exe를 프로젝트 루트의 protoc/bin 폴더에 복사
 
-cpp
-복사
-편집
+```bash
 extension-module/
 ├─ protoc/
 │  └─ bin/
 │     └─ protoc.exe
+```
 ## 5. gRPC-Web 스텁 생성
 protos/vito-stt-client.proto 파일을 기준으로, 메시지 타입과 서비스 클라이언트를 생성
 
