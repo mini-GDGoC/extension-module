@@ -14,12 +14,17 @@
 
 pnpm install
 
+
 ## 3. 환경변수 설정
 프로젝트 루트에 .env 파일을 생성   
 RTZR_CLIENT_ID=your_client_id_here   
 RTZR_CLIENT_SECRET=your_client_secret_here   
 
 ## 4. protoc 설치
+proto 파일 설치   
+https://github.com/vito-ai/openapi-grpc/tree/main
+
+
 mac / linux   
 ```bash
 brew install protobuf          # macOS Homebrew
