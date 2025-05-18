@@ -11,7 +11,7 @@
 
 ## 2. 의존성 설치
 
-```bash
+
 pnpm install
 
 ## 3. 환경변수 설정
@@ -46,10 +46,12 @@ pnpm run gen:proto:win
 macOS / Linux
 pnpm run gen:proto:unix
 패키지 스크립트 예시 (package.json):
+```bash
 "scripts": {
   "gen:proto:win": "set \"PATH=%CD%\\protoc\\bin;%CD%\\node_modules\\.bin;%PATH%\" && protoc --plugin=protoc-gen-js=protoc-gen-js --plugin=protoc-gen-grpc-web=protoc-gen-grpc-web --proto_path=protos --js_out=import_style=commonjs:src/proto --grpc-web_out=import_style=typescript,mode=grpcwebtext:src/proto protos/vito-stt-client.proto",
   "gen:proto:unix": "export PATH=$(pwd)/protoc/bin:$(pwd)/node_modules/.bin:$PATH && protoc --plugin=protoc-gen-js=protoc-gen-js --plugin=protoc-gen-grpc-web=protoc-gen-grpc-web --proto_path=protos --js_out=import_style=commonjs:src/proto --grpc-web_out=import_style=typescript,mode=grpcwebtext:src/proto protos/vito-stt-client.proto"
 }
+```
 실행 후 src/proto/에 다음 파일들이 생성됩니다:
 
 vito-stt-client_pb.d.ts
