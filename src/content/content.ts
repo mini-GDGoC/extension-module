@@ -1,5 +1,5 @@
 import htmlCapture from "./htmlCapture.ts";
-import * as wasi from "node:wasi";
+//import * as wasi from "node:wasi";
 
 /**
  * 콘텐츠 스크립트 초기화 함수
@@ -52,7 +52,7 @@ function clickAt(x: number, y: number) {
   }
 }
 
-function wait(ms) {
+function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 

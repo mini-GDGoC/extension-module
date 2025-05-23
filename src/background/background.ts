@@ -1,4 +1,4 @@
-// background.ts 또는 popup.ts에서
+// background.ts 또는 popup.ts
 
 
 /**
