@@ -1,24 +1,17 @@
-// function Popup() {
-//   return <div>Hello from React Popup!</div>
-// }
+// Popup.tsx
 
-// export default Popup
+type Props = { onClose: () => void };
 
-import ReactDOM from 'react-dom/client';
-import '../index.css';
-
-function Popup() {
+export default function Popup({ onClose }: Props) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-[#FEF9EE] w-[200px] h-[200px] flex items-center justify-center">
-        Hello from React Popup!
-      </div>
+    <div className="bg-[#FEF9EE] p-6 rounded-xl shadow-lg flex flex-col items-center">
+      <p className="mb-4">Hello from React Popup!</p>
+      <button
+        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+        onClick={onClose}
+      >
+        닫기
+      </button>
     </div>
   );
 }
-
-export default Popup;
-
-// Mounting the Popup
-const root = ReactDOM.createRoot(document.getElementById('root')!);
-root.render(<Popup />);

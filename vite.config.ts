@@ -1,39 +1,30 @@
-// import { defineConfig } from 'vite'
-// import react from '@vitejs/plugin-react'
-
-// // https://vite.dev/config/
-// export default defineConfig({
-//   plugins: [react()],
-// })
-
 // vite.config.ts
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-import tailwindcss from '@tailwindcss/vite'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 export default defineConfig({
-  plugins: [react(),tailwindcss(),],
   build: {
+    outDir:       'dist',
+    emptyOutDir:  true,
+    target:       'es2015',
+    minify:       false,
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'popup.html'),
-        content: resolve(__dirname, 'src/content/content.ts'),
         background: resolve(__dirname, 'src/background/background.ts'),
+        content:    resolve(__dirname, 'src/content/content.ts'),
       },
       output: {
-        entryFileNames: assetInfo => {
-          if (assetInfo.name === 'content') return 'content.js'
-          return '[name].js'
-        }
+        // → put them in the root, not assets/
+        entryFileNames: '[name].js',
+        // shared chunks (if any) will go under chunks/
+        chunkFileNames: 'chunks/[name].js',
+        // static assets (images/css) still under assets/
+        assetFileNames: 'assets/[name].[ext]',
+        // ES modules support MV3 code-splitting
+        format: 'es'
       }
-    },
-    outDir: 'dist',
-    emptyOutDir: true
-  }
+    }
+  },
+  // copy everything from public/ → dist/
+  publicDir: 'public'
 })

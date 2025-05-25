@@ -1,4 +1,7 @@
 import ReactDOM from 'react-dom/client'
 import Popup from './Popup'
+import '../index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<Popup />)
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <Popup onClose={() => window.close()} />
+)
