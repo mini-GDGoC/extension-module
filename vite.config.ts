@@ -12,6 +12,8 @@ export default defineConfig({
       input: {
         background: resolve(__dirname, 'src/background/background.ts'),
         content:    resolve(__dirname, 'src/content/content.ts'),
+        //pageInteraction: resolve(__dirname, 'src/content/pageInteraction.ts'),
+
       },
       output: {
         // → put them in the root, not assets/
