@@ -172,18 +172,23 @@ function createPopup() {
 
     actionButton.textContent = '스크린샷 캡처';
   actionButton.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-      if (dataUrl) {
-        // 캡처된 이미지 표시
-        const img = document.createElement('img');
-        img.src = dataUrl;
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        popupContainer.appendChild(img);
-      } else {
-        console.error('스크린샷 캡처 실패');
-      }
-    });
+    // 캡처 전에 팝업 숨기기
+    popupContainer.style.opacity = '0';
+    setTimeout(() => {
+      chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+        // 캡처 후 팝업 복원
+        popupContainer.style.opacity = '1';
+        if (dataUrl) {
+          const img = document.createElement('img');
+          img.src = dataUrl;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          popupContainer.appendChild(img);
+        } else {
+          console.error('스크린샷 캡처 실패');
+        }
+      });
+    }, 100);
   });
   actionButton.addEventListener('mouseenter', () => {
     actionButton.style.backgroundColor = '#2563EB';
