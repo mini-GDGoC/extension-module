@@ -145,7 +145,7 @@ function createPopup() {
   `;
   content.textContent = 'LLM 기반 디지털 서비스 사용 보조 Agent입니다.';
 
-  // 버튼 예시
+  // 버튼 예시: 화면 캡처 트리거
   const actionButton = document.createElement('button');
   actionButton.style.cssText = `
     padding: 8px 24px;
@@ -165,9 +165,25 @@ function createPopup() {
     transform: translate(-50%, -50%);
 
   `;
-  actionButton.textContent = '시작하기';
+  // actionButton.textContent = '시작하기';
+  // actionButton.addEventListener('click', () => {
+  //   alert('기능을 시작합니다!');
+  // });
+
+    actionButton.textContent = '스크린샷 캡처';
   actionButton.addEventListener('click', () => {
-    alert('기능을 시작합니다!');
+    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+      if (dataUrl) {
+        // 캡처된 이미지 표시
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        popupContainer.appendChild(img);
+      } else {
+        console.error('스크린샷 캡처 실패');
+      }
+    });
   });
   actionButton.addEventListener('mouseenter', () => {
     actionButton.style.backgroundColor = '#2563EB';
