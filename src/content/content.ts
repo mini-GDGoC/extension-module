@@ -80,7 +80,7 @@ function createPopup() {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     border-radius: 8px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     position: relative;
@@ -122,7 +122,7 @@ function createPopup() {
   title.style.cssText = `
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 16px;
+    margin-bottom: 0px;
     color: #1F2937;
     text-align: center;
   `;
@@ -132,10 +132,16 @@ function createPopup() {
   const content = document.createElement('p');
   content.style.cssText = `
     color: #6B7280;
-    text-align: center;
+  text-align: center;
     padding: 0 24px;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-top: auto;
+    margin-bottom: 0px;
+    align-self: stretch;
+    position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   `;
   content.textContent = 'LLM 기반 디지털 서비스 사용 보조 Agent입니다.';
 
@@ -150,6 +156,14 @@ function createPopup() {
     cursor: pointer;
     transition: background-color 0.2s;
     font-weight: 500;
+    // display: flex;
+    // justify-content: flex-end;
+    // align-items: center;
+        position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
   `;
   actionButton.textContent = '시작하기';
   actionButton.addEventListener('click', () => {
