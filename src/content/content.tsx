@@ -1,3 +1,5 @@
+import playAudioBlob from './audioPlay';
+
 // import { createRoot } from 'react-dom/client';
 import WavRecorder from '../components/WavRecorder';
 import ReactDOM from 'react-dom/client';
@@ -186,6 +188,10 @@ function createPopup() {
     setTimeout(() => {
       chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
         // 캡처 후 팝업 복원
+        {//오디오 플레이 부분 브라우전 정책상 테스트를 위해서 클릭 버튼 눌린 후에 코드를 작성함
+          playAudioBlob();
+          console.log("오디오 재생 함수가 호출되었습니다.");
+        }
         popupContainer.style.opacity = '1';
         if (dataUrl) {
           // 자동 다운로드 트리거
