@@ -1,3 +1,8 @@
+// import { createRoot } from 'react-dom/client';
+import WavRecorder from '../components/WavRecorder';
+import ReactDOM from 'react-dom/client';
+
+
 // content.ts
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
@@ -70,7 +75,7 @@ function createPopup() {
   // 오버레이 생성
   const overlay = document.createElement('div');
   overlay.id = 'extension-popup-overlay';
-
+//overlay.style.pointerEvents = 'none';
   // 팝업 컨테이너 생성
   const popupContainer = document.createElement('div');
   popupContainer.style.cssText = `
@@ -85,7 +90,15 @@ function createPopup() {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     position: relative;
     padding: 20px;
+    
   `;
+  //popupContainer.style.pointerEvents = 'none';
+
+   // (1) 닫기버튼/제목/내용/액션버튼 코드 생략
+  // (2) 아래 라인 추가 (액션버튼 아래 위치 추천)
+  const wavRoot = document.createElement('div');
+  wavRoot.id = 'wav-root';
+  popupContainer.appendChild(wavRoot);
 
   // 닫기 버튼
   const closeButton = document.createElement('button');
@@ -165,10 +178,6 @@ function createPopup() {
     transform: translate(-50%, -50%);
 
   `;
-  // actionButton.textContent = '시작하기';
-  // actionButton.addEventListener('click', () => {
-  //   alert('기능을 시작합니다!');
-  // });
 
     actionButton.textContent = '스크린샷 캡처';
   actionButton.addEventListener('click', () => {
@@ -179,16 +188,20 @@ function createPopup() {
         // 캡처 후 팝업 복원
         popupContainer.style.opacity = '1';
         if (dataUrl) {
-          const img = document.createElement('img');
-          img.src = dataUrl;
-          img.style.maxWidth = '100%';
-          img.style.height = 'auto';
-          popupContainer.appendChild(img);
+          // 자동 다운로드 트리거
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'screenshot.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+
         } else {
           console.error('스크린샷 캡처 실패');
         }
       });
-    }, 100);
+    }, 50);
   });
   actionButton.addEventListener('mouseenter', () => {
     actionButton.style.backgroundColor = '#2563EB';
@@ -197,13 +210,25 @@ function createPopup() {
     actionButton.style.backgroundColor = '#3B82F6';
   });
 
+
+
   // 요소들 조립
   popupContainer.appendChild(closeButton);
   popupContainer.appendChild(title);
   popupContainer.appendChild(content);
   popupContainer.appendChild(actionButton);
+   // (4) 그 다음에 wav-root 추가 (버튼 아래에 나타나게 하려면 이 위치)
+  popupContainer.appendChild(wavRoot);
+  
   overlay.appendChild(popupContainer);
   document.body.appendChild(overlay);
+
+   // (이 부분 추가)
+  //const wavRoot = popupContainer.querySelector('#wav-root');
+  if (wavRoot) {
+    ReactDOM.createRoot(wavRoot).render(<WavRecorder />);
+  }
+
 
   // 오버레이 클릭 시 팝업 닫기
   overlay.addEventListener('click', (e) => {
