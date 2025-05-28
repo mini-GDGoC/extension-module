@@ -1,100 +1,3 @@
-// import React, { useRef, useState, useEffect } from 'react';
-// import { WaveFile } from 'wavefile';
-
-// interface WavRecorderProps {
-//   onFinish?: () => void;
-// }
-
-// const WavRecorder: React.FC<WavRecorderProps> = ({ onFinish }) => {
-//   const [recording, setRecording] = useState(false);
-//   // const mediaRecorderRef = useRef<MediaRecorder>();
-//   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-//   const audioChunksRef = useRef<Blob[]>([]);
-
-//   useEffect(() => {
-//     // cleanup on unmount
-//     return () => {
-//     const recorder = mediaRecorderRef.current;
-//     if (recorder && recorder.state !== 'inactive') {
-//       recorder.stop();
-//     }
-//   };
-//   }, []);
-
-//   const startRecording = async () => {
-//     setRecording(true);
-//     audioChunksRef.current = [];
-
-//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//     const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-//     mediaRecorderRef.current = recorder;
-
-//     recorder.ondataavailable = e => {
-//       if (e.data.size > 0) audioChunksRef.current.push(e.data);
-//     };
-
-//     recorder.onstop = async () => {
-//       // 1) webm → PCM
-//       const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-//       const arrayBuffer = await blob.arrayBuffer();
-//       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-//       const decoded = await audioCtx.decodeAudioData(arrayBuffer);
-
-//       // 2) WAV로 인코딩
-//       const wav = new WaveFile();
-//       wav.fromScratch(
-//         1,
-//         decoded.sampleRate,
-//         '16',
-//         decoded.getChannelData(0)
-//       );
-//       const wavBuffer = wav.toBuffer();
-//       const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
-
-//       // 3) 자동 다운로드
-//       const url = URL.createObjectURL(wavBlob);
-//       const a = document.createElement('a');
-//       a.href = url;
-//       a.download = 'recorded.wav';
-//       document.body.appendChild(a);
-//       a.click();
-//       document.body.removeChild(a);
-//       URL.revokeObjectURL(url);
-
-//       setRecording(false);
-//       onFinish?.();
-//     };
-
-//     recorder.start();
-//     // 3초 뒤 자동 중지
-//     setTimeout(() => {
-//       recorder.stop();
-//       stream.getTracks().forEach(t => t.stop());
-//     }, 3000);
-//   };
-
-//   return (
-//     <div style={{ textAlign: 'center', marginTop: 16 }}>
-//       <button
-//         onClick={startRecording}
-//         disabled={recording}
-//         style={{
-//           padding: '8px 24px',
-//           backgroundColor: recording ? '#9CA3AF' : '#10B981',
-//           color: 'white',
-//           border: 'none',
-//           borderRadius: 6,
-//           cursor: recording ? 'not-allowed' : 'pointer',
-//         }}
-//       >
-//         {recording ? '녹음 중…' : '3초 음성 녹음'}
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default WavRecorder;
-
 import { useRef, useState } from 'react';
 
 export default function WavRecorder() {
@@ -120,8 +23,11 @@ export default function WavRecorder() {
 
     mediaRecorder.onstop = async () => {
       // webm -> wav 변환 (간단히 webm 파일로 저장, wav 변환은 서버에서 하거나 추가 작업 필요)
-      const blob = new Blob(audioChunks.current, { type: 'audio/wav' });
+        // 1) 녹음된 청크(조각)들을 합쳐서 Blob 객체로 만든다
+      const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        // 2) Blob 으로부터 브라우저가 재생·다운로드할 수 있는 URL 생성
       setAudioUrl(URL.createObjectURL(blob));
+        // 3) 마이크 스트림(트랙)을 완전히 닫아서 리소스 해제
       stream.getTracks().forEach((track) => track.stop());
       setRecording(false);
     };
