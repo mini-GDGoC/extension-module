@@ -1,3 +1,4 @@
+//overlayManager.ts
 console.log('Background script loaded');
 
 chrome.action.onClicked.addListener((tab) => {
