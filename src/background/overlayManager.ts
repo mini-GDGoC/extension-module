@@ -85,6 +85,47 @@ function createPopup() {
   loadReactPopup();
 }
 
+// function loadReactPopup() {
+//   // React 앱을 동적으로 로드하고 렌더링하는 스크립트
+//   const script = document.createElement('script');
+//   script.type = 'module';
+//   script.textContent = `
+//     import ReactDOM from 'react-dom/client';
+//     import React from 'react';
+
+//     function ExtensionPopup() {
+//       const closePopup = () => {
+//         const overlay = document.getElementById('extension-popup-overlay');
+//         if (overlay) overlay.remove();
+//       };
+
+//       return React.createElement('div', {
+//         className: 'bg-[#FEF9EE] w-[400px] h-[300px] flex flex-col items-center justify-center rounded-lg shadow-2xl relative',
+//         style: { fontFamily: 'system-ui, -apple-system, sans-serif' }
+//       }, [
+//         React.createElement('button', {
+//           key: 'close-btn',
+//           onClick: closePopup,
+//           className: 'absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-600 font-bold text-lg',
+//           title: '닫기'
+//         }, '×'),
+//         React.createElement('h2', {
+//           key: 'title',
+//           className: 'text-xl font-bold mb-4 text-gray-800'
+//         }, '손길도우미'),
+//         React.createElement('p', {
+//           key: 'content',
+//           className: 'text-gray-600 text-center px-6'
+//         }, 'LLM 기반 디지털 서비스 사용 보조 Agent입니다.')
+//       ]);
+//     }
+
+//     const root = ReactDOM.createRoot(document.getElementById('popup-root'));
+//     root.render(React.createElement(ExtensionPopup));
+//   `;
+  
+//   document.head.appendChild(script);
+// }
 function loadReactPopup() {
   // React 앱을 동적으로 로드하고 렌더링하는 스크립트
   const script = document.createElement('script');
@@ -109,14 +150,7 @@ function loadReactPopup() {
           className: 'absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-600 font-bold text-lg',
           title: '닫기'
         }, '×'),
-        React.createElement('h2', {
-          key: 'title',
-          className: 'text-xl font-bold mb-4 text-gray-800'
-        }, '손길도우미'),
-        React.createElement('p', {
-          key: 'content',
-          className: 'text-gray-600 text-center px-6'
-        }, 'LLM 기반 디지털 서비스 사용 보조 Agent입니다.')
+
       ]);
     }
 
