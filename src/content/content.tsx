@@ -26,6 +26,9 @@ function createPopup() {
   overlay.style.width = '100vw';
   overlay.style.height = '100vh';
   overlay.style.zIndex = '999999';
+    //터치 이벤트 통과
+  //overlay.style.pointerEvents = 'none';
+
 
   // shadow root 생성
   const shadow = overlay.attachShadow({ mode: 'open' });
@@ -138,6 +141,9 @@ function createPopup() {
   // 팝업 컨테이너
   const popupContainer = document.createElement('div');
   popupContainer.id = 'popup-container';
+  
+  //터치 이벤트 통과
+  //popupContainer.style.pointerEvents = 'none';
 
   // 팝업 내부 클릭은 버블링 막기
 popupContainer.addEventListener('click', (e) => {
@@ -198,6 +204,11 @@ popupContainer.addEventListener('click', (e) => {
 
   // 두번째 화면: 캡처 + WavRecorder
   function showCaptureAndRecord() {
+    popupContainer.innerHTML = '';
+
+    //필요해요 버튼 클릭 이후 캡처 통과되도록
+    overlay.style.pointerEvents = 'none';
+    popupContainer.style.pointerEvents = 'none';
     popupContainer.innerHTML = '';
 
     // 닫기 버튼
