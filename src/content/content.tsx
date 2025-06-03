@@ -116,7 +116,36 @@ async function createPopup() {
           .then(data => {
             console.log('서버 응답:', data);
             // 여기서 UI 업데이트, 다음 단계 등 후처리!
+
+                        // ==============================
+            // ★ mp3 파일 재생 및 플레이어 추가 ★
+            // 서버 응답에 tts_file 속성이 있다면,
+            // 1) Audio 객체로 바로 재생
+            // 2) 화면에 <audio controls> 플레이어를 붙여서 사용자도 조작할 수 있도록 함
+            // ==============================
+            if (data.tts_file) {
+              // 1) Audio 객체 생성 후 자동 재생
+              const audio = new Audio(data.tts_file);
+              audio.play().catch(err => {
+                console.warn('자동 재생 실패:', err);
+              });
+
+              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레이어)
+              const audioElem = document.createElement('audio');
+              audioElem.src = data.tts_file;
+              audioElem.controls = true;
+              audioElem.style.width = '100%';
+              audioElem.style.marginTop = '16px';
+              popupContainer.appendChild(audioElem);
+            }
+
+            // 이후에 choices, follow_up_question 등을 사용해서
+            // UI 업데이트 로직을 여기에 추가하면 됩니다.
+            // 예시) 질문 다시 띄우기:
+            // popupContainer.innerHTML = `<p>${data.follow_up_question}</p>`;
+            // …
           })
+          
           .catch(error => {
             console.error('업로드 실패:', error);
           });
