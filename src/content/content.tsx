@@ -15,6 +15,25 @@ function togglePopup() {
   if (existing) existing.remove();
   else createPopup();
 }
+function triggerCenterClickThrough() {
+  // 화면 중앙 좌표 계산
+  const x = window.innerWidth / 2;
+  const y = window.innerHeight / 2;
+
+  // 중앙 좌표에 클릭 이벤트 생성
+  const elem = document.elementFromPoint(x, y);
+  if (elem) {
+    // 마우스 이벤트(Click) 생성 및 전파
+    const event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y
+    });
+    elem.dispatchEvent(event);
+  }
+}
 
 
 async function createPopup() {
@@ -120,6 +139,9 @@ popupContainer.addEventListener('click', (e) => {
     overlay.style.pointerEvents = 'none';
     popupContainer.style.pointerEvents = 'none';
     popupContainer.innerHTML = '';
+
+    // 화면 중앙에 클릭 이벤트 트리거
+  triggerCenterClickThrough();
 
     // 닫기 버튼
     const closeButton = document.createElement('button');
