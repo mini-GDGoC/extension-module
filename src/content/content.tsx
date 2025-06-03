@@ -4,6 +4,9 @@
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+
 chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
   if (request.action === 'togglePopup') {
     togglePopup();
@@ -15,7 +18,6 @@ function togglePopup() {
   if (existing) existing.remove();
   else createPopup();
 }
-
 
 function triggerCenterClickThrough() {
   // 화면 중앙 좌표 계산
@@ -37,29 +39,7 @@ function triggerCenterClickThrough() {
   }
 }
 
-
-
-
-async function createPopup() {
-  // 오버레이 생성
-  const overlay = document.createElement('div');
-  overlay.id = 'extension-popup-overlay';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100vw';
-  overlay.style.height = '100vh';
-  overlay.style.zIndex = '999999';
-
-
-
-  // shadow root 생성
-  const shadow = overlay.attachShadow({ mode: 'open' });
-
-  // popup.css를 fetch해서 shadow root에 삽입 (비동기 처리)
-  await loadPopupCSS(shadow);
-
-// popup.css를 불러와 shadow root에 <style>로 삽입하는 함수 추가
+// popup.css를 불러와 shadow root에 <style>로 삽입하는 함수
 async function loadPopupCSS(shadowRoot: ShadowRoot) {
   try {
     const cssURL = chrome.runtime.getURL('css/popup.css');
@@ -73,15 +53,77 @@ async function loadPopupCSS(shadowRoot: ShadowRoot) {
   }
 }
 
+async function createPopup() {
+  // 오버레이 생성
+  const overlay = document.createElement('div');
+  overlay.id = 'extension-popup-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100vw';
+  overlay.style.height = '100vh';
+  overlay.style.zIndex = '999999';
+
+  // shadow root 생성
+  const shadow = overlay.attachShadow({ mode: 'open' });
+
+  // popup.css를 fetch해서 shadow root에 삽입 (비동기 처리)
+  await loadPopupCSS(shadow);
+
   // 팝업 컨테이너
   const popupContainer = document.createElement('div');
   popupContainer.id = 'popup-container';
 
-
   // 팝업 내부 클릭은 버블링 막기
-popupContainer.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
+  popupContainer.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
+  function autoCapture() {
+    // 팝업 안보이게 (필요시)
+    popupContainer.style.opacity = '0';
+
+    setTimeout(() => {
+      chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+        popupContainer.style.opacity = '1';
+        if (dataUrl) {
+          // 1. dataUrl을 Blob(이미지)으로 변환
+          function dataURLtoBlob(dataurl: string) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)![1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+          }
+          const imgBlob = dataURLtoBlob(dataUrl);
+
+          // 2. FormData에 파일 추가
+          const formData = new FormData();
+          formData.append('file', imgBlob, 'screenshot.png');
+
+          // 3. fetch를 사용한 multipart/form-data 전송 (axios 대신)
+          fetch(`${BASE_URL}/get-question`, {
+            method: 'POST',
+            body: formData,
+            // Content-Type 헤더는 fetch가 자동으로 설정하므로 제거
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('서버 응답:', data);
+            // 여기서 UI 업데이트, 다음 단계 등 후처리!
+          })
+          .catch(error => {
+            console.error('업로드 실패:', error);
+          });
+        }
+      });
+    }, 500);
+  }
 
   // 첫 화면: 음성 안내 필요?
   showPrompt();
@@ -117,10 +159,8 @@ popupContainer.addEventListener('click', (e) => {
     needBtn.textContent = '필요해요';
     needBtn.style.cssText =
       'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
-    //needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
     needBtn.onclick = askTakeOut; // 두번째 화면으로
 
-    
     // 아니요 버튼
     const nopeBtn = document.createElement('button');
     nopeBtn.textContent = '아니오';
@@ -136,86 +176,23 @@ popupContainer.addEventListener('click', (e) => {
     popupContainer.appendChild(question);
     popupContainer.appendChild(buttonWrap);
   }
-  // 자동 캡처 함수 정의
-function autoCapture() {
-  // 팝업 안보이게 (필요시)
-  popupContainer.style.opacity = '0';
-
-  setTimeout(() => {
-    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-      popupContainer.style.opacity = '1';
-      if (dataUrl) {
-        // 다운로드까지 원한다면 아래 코드 사용
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = 'screenshot.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-      // 만약 다운로드 말고 다른 후처리 원하면 여기서 처리
-    });
-  }, 500);
-}
-
-  // 두번째 화면: 캡처 + WavRecorder
-  // function showCaptureAndRecord() {
-  //   popupContainer.innerHTML = '';
-
-  //   //필요해요 버튼 클릭 이후 캡처 통과되도록
-  //   overlay.style.pointerEvents = 'none';
-  //   popupContainer.style.pointerEvents = 'none';
-  //   popupContainer.innerHTML = '';
-
-  //   // 화면 중앙에 클릭 이벤트 트리거
-  // triggerCenterClickThrough();
-
-  //   // 닫기 버튼
-  //   const closeButton = document.createElement('button');
-  //   closeButton.id = 'close-btn';
-  //   closeButton.innerHTML = '×';
-  //   closeButton.title = '닫기';
-  //   closeButton.onclick = () => overlay.remove();
-
-  //   // 타이틀
-  //   const title = document.createElement('h2');
-  //   title.textContent = '손길도우미';
-
-  //   // 안내 텍스트
-  //   const content = document.createElement('p');
-  //   content.textContent = '스크린샷 캡처 또는 음성 안내 녹음을 시작할 수 있습니다.';
-
-
-  //   // WavRecorder mount할 div
-  //   const wavRoot = document.createElement('div');
-  //   wavRoot.id = 'wav-root';
-
-  //   popupContainer.appendChild(closeButton);
-  //   popupContainer.appendChild(title);
-  //   popupContainer.appendChild(content);
-  //   popupContainer.appendChild(captureBtn);
-  //   popupContainer.appendChild(wavRoot);
-
-  //   // React 컴포넌트 mount (shadowRoot에서!)
-  //   ReactDOM.createRoot(wavRoot).render(<WavRecorder />);
-  // }
 
   function askTakeOut() {
     popupContainer.innerHTML = '';
 
-    //필요해요 버튼 클릭 이후 캡처 통과되도록
+    // 필요해요 버튼 클릭 이후 캡처 통과되도록
     overlay.style.pointerEvents = 'none';
     popupContainer.style.pointerEvents = 'none';
     popupContainer.innerHTML = '';
 
     // 화면 중앙에 클릭 이벤트 트리거
-  triggerCenterClickThrough();
-  autoCapture();
+    triggerCenterClickThrough();
+    autoCapture();
 
-
-  // 타이틀
+    // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
+    
     // 버튼 그룹
     const buttonWrap = document.createElement('div');
     buttonWrap.style.display = 'flex';
@@ -228,9 +205,7 @@ function autoCapture() {
     needBtn.textContent = '포장해가요';
     needBtn.style.cssText =
       'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
-    //needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
 
-    
     // 먹고가요 버튼
     const nopeBtn = document.createElement('button');
     nopeBtn.textContent = '먹고가요';
@@ -242,7 +217,6 @@ function autoCapture() {
 
     popupContainer.appendChild(title);
     popupContainer.appendChild(buttonWrap);
-
   }
 
   shadow.appendChild(popupContainer);
