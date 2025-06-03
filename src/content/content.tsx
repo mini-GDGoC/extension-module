@@ -1,6 +1,6 @@
-import ReactDOM from 'react-dom/client';
-import WavRecorder from '../components/WavRecorder';
-import playAudioBlob from './audioPlay';
+// import ReactDOM from 'react-dom/client';
+// import WavRecorder from '../components/WavRecorder';
+// import playAudioBlob from './audioPlay';
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
@@ -113,8 +113,10 @@ popupContainer.addEventListener('click', (e) => {
     needBtn.textContent = '필요해요';
     needBtn.style.cssText =
       'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
-    needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
+    //needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
+    needBtn.onclick = askTakeOut; // 두번째 화면으로
 
+    
     // 아니요 버튼
     const nopeBtn = document.createElement('button');
     nopeBtn.textContent = '아니오';
@@ -132,7 +134,69 @@ popupContainer.addEventListener('click', (e) => {
   }
 
   // 두번째 화면: 캡처 + WavRecorder
-  function showCaptureAndRecord() {
+  // function showCaptureAndRecord() {
+  //   popupContainer.innerHTML = '';
+
+  //   //필요해요 버튼 클릭 이후 캡처 통과되도록
+  //   overlay.style.pointerEvents = 'none';
+  //   popupContainer.style.pointerEvents = 'none';
+  //   popupContainer.innerHTML = '';
+
+  //   // 화면 중앙에 클릭 이벤트 트리거
+  // triggerCenterClickThrough();
+
+  //   // 닫기 버튼
+  //   const closeButton = document.createElement('button');
+  //   closeButton.id = 'close-btn';
+  //   closeButton.innerHTML = '×';
+  //   closeButton.title = '닫기';
+  //   closeButton.onclick = () => overlay.remove();
+
+  //   // 타이틀
+  //   const title = document.createElement('h2');
+  //   title.textContent = '손길도우미';
+
+  //   // 안내 텍스트
+  //   const content = document.createElement('p');
+  //   content.textContent = '스크린샷 캡처 또는 음성 안내 녹음을 시작할 수 있습니다.';
+
+  //   // 캡처 버튼
+  //   const captureBtn = document.createElement('button');
+  //   captureBtn.id = 'action-btn';
+  //   captureBtn.textContent = '스크린샷 캡처';
+  //   captureBtn.onclick = () => {
+  //     popupContainer.style.opacity = '0';
+  //     setTimeout(() => {
+  //       chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+  //         playAudioBlob();
+  //         popupContainer.style.opacity = '1';
+  //         if (dataUrl) {
+  //           const link = document.createElement('a');
+  //           link.href = dataUrl;
+  //           link.download = 'screenshot.png';
+  //           document.body.appendChild(link);
+  //           link.click();
+  //           document.body.removeChild(link);
+  //         }
+  //       });
+  //     }, 50);
+  //   };
+
+  //   // WavRecorder mount할 div
+  //   const wavRoot = document.createElement('div');
+  //   wavRoot.id = 'wav-root';
+
+  //   popupContainer.appendChild(closeButton);
+  //   popupContainer.appendChild(title);
+  //   popupContainer.appendChild(content);
+  //   popupContainer.appendChild(captureBtn);
+  //   popupContainer.appendChild(wavRoot);
+
+  //   // React 컴포넌트 mount (shadowRoot에서!)
+  //   ReactDOM.createRoot(wavRoot).render(<WavRecorder />);
+  // }
+
+  function askTakeOut() {
     popupContainer.innerHTML = '';
 
     //필요해요 버튼 클릭 이후 캡처 통과되도록
@@ -143,55 +207,39 @@ popupContainer.addEventListener('click', (e) => {
     // 화면 중앙에 클릭 이벤트 트리거
   triggerCenterClickThrough();
 
-    // 닫기 버튼
-    const closeButton = document.createElement('button');
-    closeButton.id = 'close-btn';
-    closeButton.innerHTML = '×';
-    closeButton.title = '닫기';
-    closeButton.onclick = () => overlay.remove();
 
-    // 타이틀
+  // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
+    // 버튼 그룹
+    const buttonWrap = document.createElement('div');
+    buttonWrap.style.display = 'flex';
+    buttonWrap.style.justifyContent = 'center';
+    buttonWrap.style.marginTop = '28px';
+    buttonWrap.style.gap = '16px';
 
-    // 안내 텍스트
-    const content = document.createElement('p');
-    content.textContent = '스크린샷 캡처 또는 음성 안내 녹음을 시작할 수 있습니다.';
+    // 필요해요 버튼
+    const needBtn = document.createElement('button');
+    needBtn.textContent = '포장해가요';
+    needBtn.style.cssText =
+      'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
+    //needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
+    //needBtn.onclick = askTakeOut; // 두번째 화면으로
 
-    // 캡처 버튼
-    const captureBtn = document.createElement('button');
-    captureBtn.id = 'action-btn';
-    captureBtn.textContent = '스크린샷 캡처';
-    captureBtn.onclick = () => {
-      popupContainer.style.opacity = '0';
-      setTimeout(() => {
-        chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-          playAudioBlob();
-          popupContainer.style.opacity = '1';
-          if (dataUrl) {
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'screenshot.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        });
-      }, 50);
-    };
+    
+    // 아니요 버튼
+    const nopeBtn = document.createElement('button');
+    nopeBtn.textContent = '먹고가요';
+    nopeBtn.style.cssText =
+      'padding:12px 32px;background:#E5E7EB;color:#4B5563;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
+    nopeBtn.onclick = () => overlay.remove();
 
-    // WavRecorder mount할 div
-    const wavRoot = document.createElement('div');
-    wavRoot.id = 'wav-root';
+    buttonWrap.appendChild(needBtn);
+    buttonWrap.appendChild(nopeBtn);
 
-    popupContainer.appendChild(closeButton);
     popupContainer.appendChild(title);
-    popupContainer.appendChild(content);
-    popupContainer.appendChild(captureBtn);
-    popupContainer.appendChild(wavRoot);
+    popupContainer.appendChild(buttonWrap);
 
-    // React 컴포넌트 mount (shadowRoot에서!)
-    ReactDOM.createRoot(wavRoot).render(<WavRecorder />);
   }
 
   shadow.appendChild(popupContainer);
