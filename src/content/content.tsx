@@ -1,8 +1,11 @@
-import ReactDOM from 'react-dom/client';
-import WavRecorder from '../components/WavRecorder';
-import playAudioBlob from './audioPlay';
+// import ReactDOM from 'react-dom/client';
+// import WavRecorder from '../components/WavRecorder';
+// import playAudioBlob from './audioPlay';
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
 
 chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
   if (request.action === 'togglePopup') {
@@ -16,7 +19,41 @@ function togglePopup() {
   else createPopup();
 }
 
-function createPopup() {
+function triggerCenterClickThrough() {
+  // 화면 중앙 좌표 계산
+  const x = window.innerWidth / 2;
+  const y = window.innerHeight / 2;
+
+  // 중앙 좌표에 클릭 이벤트 생성
+  const elem = document.elementFromPoint(x, y);
+  if (elem) {
+    // 마우스 이벤트(Click) 생성 및 전파
+    const event = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y
+    });
+    elem.dispatchEvent(event);
+  }
+}
+
+// popup.css를 불러와 shadow root에 <style>로 삽입하는 함수
+async function loadPopupCSS(shadowRoot: ShadowRoot) {
+  try {
+    const cssURL = chrome.runtime.getURL('css/popup.css');
+    const resp = await fetch(cssURL);
+    const cssText = await resp.text();
+    const styleTag = document.createElement('style');
+    styleTag.textContent = cssText;
+    shadowRoot.appendChild(styleTag);
+  } catch (err) {
+    console.error('popup.css 로드 실패:', err);
+  }
+}
+
+async function createPopup() {
   // 오버레이 생성
   const overlay = document.createElement('div');
   overlay.id = 'extension-popup-overlay';
@@ -30,119 +67,92 @@ function createPopup() {
   // shadow root 생성
   const shadow = overlay.attachShadow({ mode: 'open' });
 
-  // 스타일 삽입
-  const style = document.createElement('style');
-  style.textContent = `
-    #popup-container {
-      background-color: #FEF9EE;
-      width: 400px;
-      height: 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      position: relative;
-      padding: 20px;
-      animation: slideIn 0.3s ease-out;
-    }
-    #close-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      color: #6B7280;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 50%;
-      font-weight: bold;
-      transition: background-color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #close-btn:hover {
-      background: #E5E7EB;
-    }
-    h2 {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 0 0 10px 0;
-      color: #1F2937;
-      text-align: center;
-    }
-    p {
-      color: #6B7280;
-      text-align: center;
-      padding: 0 24px;
-      line-height: 1.6;
-      margin-top: auto;
-      margin-bottom: 0px;
-      align-self: stretch;
-    }
-    #action-btn {
-      padding: 8px 24px;
-      background-color: #3B82F6;
-      color: white;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 500;
-      position: relative;
-      margin-top: 20px;
-      transition: background-color 0.2s;
-    }
-    #action-btn:hover {
-      background-color: #2563EB;
-    }
-    #wav-root {
-      width: 100%;
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    :host {
-      all: initial;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.5);
-      z-index: 999999 !important;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      animation: fadeIn 0.2s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  `;
-  shadow.appendChild(style);
+  // popup.css를 fetch해서 shadow root에 삽입 (비동기 처리)
+  await loadPopupCSS(shadow);
 
   // 팝업 컨테이너
   const popupContainer = document.createElement('div');
   popupContainer.id = 'popup-container';
 
   // 팝업 내부 클릭은 버블링 막기
-popupContainer.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
+  popupContainer.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
+  function autoCapture() {
+    // 팝업 안보이게 (필요시)
+    popupContainer.style.opacity = '0';
+
+    setTimeout(() => {
+      chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+        popupContainer.style.opacity = '1';
+        if (dataUrl) {
+          // 1. dataUrl을 Blob(이미지)으로 변환
+          function dataURLtoBlob(dataurl: string) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)![1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+          }
+          const imgBlob = dataURLtoBlob(dataUrl);
+
+          // 2. FormData에 파일 추가
+          const formData = new FormData();
+          formData.append('file', imgBlob, 'screenshot.png');
+
+          // 3. fetch를 사용한 multipart/form-data 전송 (axios 대신)
+          fetch(`${BASE_URL}/get-question`, {
+            method: 'POST',
+            body: formData,
+            // Content-Type 헤더는 fetch가 자동으로 설정하므로 제거
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('서버 응답:', data);
+            // 여기서 UI 업데이트, 다음 단계 등 후처리!
+
+                        // ==============================
+            // ★ mp3 파일 재생 및 플레이어 추가 ★
+            // 서버 응답에 tts_file 속성이 있다면,
+            // 1) Audio 객체로 바로 재생
+            // 2) 화면에 <audio controls> 플레이어를 붙여서 사용자도 조작할 수 있도록 함
+            // ==============================
+            if (data.tts_file) {
+              // 1) Audio 객체 생성 후 자동 재생
+              const audio = new Audio(data.tts_file);
+              audio.play().catch(err => {
+                console.warn('자동 재생 실패:', err);
+              });
+
+              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레이어)
+              const audioElem = document.createElement('audio');
+              audioElem.src = data.tts_file;
+              audioElem.controls = true;
+              audioElem.style.width = '100%';
+              audioElem.style.marginTop = '16px';
+              popupContainer.appendChild(audioElem);
+            }
+
+            // 이후에 choices, follow_up_question 등을 사용해서
+            // UI 업데이트 로직을 여기에 추가하면 됩니다.
+            // 예시) 질문 다시 띄우기:
+            // popupContainer.innerHTML = `<p>${data.follow_up_question}</p>`;
+            // …
+          })
+          
+          .catch(error => {
+            console.error('업로드 실패:', error);
+          });
+        }
+      });
+    }, 500);
+  }
 
   // 첫 화면: 음성 안내 필요?
   showPrompt();
@@ -178,7 +188,7 @@ popupContainer.addEventListener('click', (e) => {
     needBtn.textContent = '필요해요';
     needBtn.style.cssText =
       'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
-    needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
+    needBtn.onclick = askTakeOut; // 두번째 화면으로
 
     // 아니요 버튼
     const nopeBtn = document.createElement('button');
@@ -196,59 +206,46 @@ popupContainer.addEventListener('click', (e) => {
     popupContainer.appendChild(buttonWrap);
   }
 
-  // 두번째 화면: 캡처 + WavRecorder
-  function showCaptureAndRecord() {
+  function askTakeOut() {
     popupContainer.innerHTML = '';
 
-    // 닫기 버튼
-    const closeButton = document.createElement('button');
-    closeButton.id = 'close-btn';
-    closeButton.innerHTML = '×';
-    closeButton.title = '닫기';
-    closeButton.onclick = () => overlay.remove();
+    // 필요해요 버튼 클릭 이후 캡처 통과되도록
+    overlay.style.pointerEvents = 'none';
+    popupContainer.style.pointerEvents = 'none';
+    popupContainer.innerHTML = '';
+
+    // 화면 중앙에 클릭 이벤트 트리거
+    triggerCenterClickThrough();
+    autoCapture();
 
     // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
+    
+    // 버튼 그룹
+    const buttonWrap = document.createElement('div');
+    buttonWrap.style.display = 'flex';
+    buttonWrap.style.justifyContent = 'center';
+    buttonWrap.style.marginTop = '28px';
+    buttonWrap.style.gap = '16px';
 
-    // 안내 텍스트
-    const content = document.createElement('p');
-    content.textContent = '스크린샷 캡처 또는 음성 안내 녹음을 시작할 수 있습니다.';
+    // 포장 버튼
+    const needBtn = document.createElement('button');
+    needBtn.textContent = '포장해가요';
+    needBtn.style.cssText =
+      'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
 
-    // 캡처 버튼
-    const captureBtn = document.createElement('button');
-    captureBtn.id = 'action-btn';
-    captureBtn.textContent = '스크린샷 캡처';
-    captureBtn.onclick = () => {
-      popupContainer.style.opacity = '0';
-      setTimeout(() => {
-        chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-          playAudioBlob();
-          popupContainer.style.opacity = '1';
-          if (dataUrl) {
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'screenshot.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        });
-      }, 50);
-    };
+    // 먹고가요 버튼
+    const nopeBtn = document.createElement('button');
+    nopeBtn.textContent = '먹고가요';
+    nopeBtn.style.cssText =
+      'padding:12px 32px;background:#E5E7EB;color:#4B5563;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
 
-    // WavRecorder mount할 div
-    const wavRoot = document.createElement('div');
-    wavRoot.id = 'wav-root';
+    buttonWrap.appendChild(needBtn);
+    buttonWrap.appendChild(nopeBtn);
 
-    popupContainer.appendChild(closeButton);
     popupContainer.appendChild(title);
-    popupContainer.appendChild(content);
-    popupContainer.appendChild(captureBtn);
-    popupContainer.appendChild(wavRoot);
-
-    // React 컴포넌트 mount (shadowRoot에서!)
-    ReactDOM.createRoot(wavRoot).render(<WavRecorder />);
+    popupContainer.appendChild(buttonWrap);
   }
 
   shadow.appendChild(popupContainer);
