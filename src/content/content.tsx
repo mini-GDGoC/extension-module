@@ -15,6 +15,8 @@ function togglePopup() {
   if (existing) existing.remove();
   else createPopup();
 }
+
+
 function triggerCenterClickThrough() {
   // 화면 중앙 좌표 계산
   const x = window.innerWidth / 2;
@@ -34,6 +36,8 @@ function triggerCenterClickThrough() {
     elem.dispatchEvent(event);
   }
 }
+
+
 
 
 async function createPopup() {
@@ -132,6 +136,27 @@ popupContainer.addEventListener('click', (e) => {
     popupContainer.appendChild(question);
     popupContainer.appendChild(buttonWrap);
   }
+  // 자동 캡처 함수 정의
+function autoCapture() {
+  // 팝업 안보이게 (필요시)
+  popupContainer.style.opacity = '0';
+
+  setTimeout(() => {
+    chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
+      popupContainer.style.opacity = '1';
+      if (dataUrl) {
+        // 다운로드까지 원한다면 아래 코드 사용
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'screenshot.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      // 만약 다운로드 말고 다른 후처리 원하면 여기서 처리
+    });
+  }, 500);
+}
 
   // 두번째 화면: 캡처 + WavRecorder
   // function showCaptureAndRecord() {
@@ -160,27 +185,6 @@ popupContainer.addEventListener('click', (e) => {
   //   const content = document.createElement('p');
   //   content.textContent = '스크린샷 캡처 또는 음성 안내 녹음을 시작할 수 있습니다.';
 
-  //   // 캡처 버튼
-  //   const captureBtn = document.createElement('button');
-  //   captureBtn.id = 'action-btn';
-  //   captureBtn.textContent = '스크린샷 캡처';
-  //   captureBtn.onclick = () => {
-  //     popupContainer.style.opacity = '0';
-  //     setTimeout(() => {
-  //       chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-  //         playAudioBlob();
-  //         popupContainer.style.opacity = '1';
-  //         if (dataUrl) {
-  //           const link = document.createElement('a');
-  //           link.href = dataUrl;
-  //           link.download = 'screenshot.png';
-  //           document.body.appendChild(link);
-  //           link.click();
-  //           document.body.removeChild(link);
-  //         }
-  //       });
-  //     }, 50);
-  //   };
 
   //   // WavRecorder mount할 div
   //   const wavRoot = document.createElement('div');
@@ -206,6 +210,7 @@ popupContainer.addEventListener('click', (e) => {
 
     // 화면 중앙에 클릭 이벤트 트리거
   triggerCenterClickThrough();
+  autoCapture();
 
 
   // 타이틀
@@ -218,21 +223,19 @@ popupContainer.addEventListener('click', (e) => {
     buttonWrap.style.marginTop = '28px';
     buttonWrap.style.gap = '16px';
 
-    // 필요해요 버튼
+    // 포장 버튼
     const needBtn = document.createElement('button');
     needBtn.textContent = '포장해가요';
     needBtn.style.cssText =
       'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
     //needBtn.onclick = showCaptureAndRecord; // 두번째 화면으로
-    //needBtn.onclick = askTakeOut; // 두번째 화면으로
 
     
-    // 아니요 버튼
+    // 먹고가요 버튼
     const nopeBtn = document.createElement('button');
     nopeBtn.textContent = '먹고가요';
     nopeBtn.style.cssText =
       'padding:12px 32px;background:#E5E7EB;color:#4B5563;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
-    nopeBtn.onclick = () => overlay.remove();
 
     buttonWrap.appendChild(needBtn);
     buttonWrap.appendChild(nopeBtn);
