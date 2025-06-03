@@ -16,7 +16,8 @@ function togglePopup() {
   else createPopup();
 }
 
-function createPopup() {
+
+async function createPopup() {
   // 오버레이 생성
   const overlay = document.createElement('div');
   overlay.id = 'extension-popup-overlay';
@@ -26,124 +27,33 @@ function createPopup() {
   overlay.style.width = '100vw';
   overlay.style.height = '100vh';
   overlay.style.zIndex = '999999';
-    //터치 이벤트 통과
-  //overlay.style.pointerEvents = 'none';
+
 
 
   // shadow root 생성
   const shadow = overlay.attachShadow({ mode: 'open' });
 
-  // 스타일 삽입
-  const style = document.createElement('style');
-  style.textContent = `
-    #popup-container {
-      background-color: #FEF9EE;
-      width: 400px;
-      height: 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      position: relative;
-      padding: 20px;
-      animation: slideIn 0.3s ease-out;
-    }
-    #close-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      color: #6B7280;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 50%;
-      font-weight: bold;
-      transition: background-color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #close-btn:hover {
-      background: #E5E7EB;
-    }
-    h2 {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 0 0 10px 0;
-      color: #1F2937;
-      text-align: center;
-    }
-    p {
-      color: #6B7280;
-      text-align: center;
-      padding: 0 24px;
-      line-height: 1.6;
-      margin-top: auto;
-      margin-bottom: 0px;
-      align-self: stretch;
-    }
-    #action-btn {
-      padding: 8px 24px;
-      background-color: #3B82F6;
-      color: white;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 500;
-      position: relative;
-      margin-top: 20px;
-      transition: background-color 0.2s;
-    }
-    #action-btn:hover {
-      background-color: #2563EB;
-    }
-    #wav-root {
-      width: 100%;
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    :host {
-      all: initial;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.5);
-      z-index: 999999 !important;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      animation: fadeIn 0.2s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  `;
-  shadow.appendChild(style);
+  // popup.css를 fetch해서 shadow root에 삽입 (비동기 처리)
+  await loadPopupCSS(shadow);
+
+// popup.css를 불러와 shadow root에 <style>로 삽입하는 함수 추가
+async function loadPopupCSS(shadowRoot: ShadowRoot) {
+  try {
+    const cssURL = chrome.runtime.getURL('css/popup.css');
+    const resp = await fetch(cssURL);
+    const cssText = await resp.text();
+    const styleTag = document.createElement('style');
+    styleTag.textContent = cssText;
+    shadowRoot.appendChild(styleTag);
+  } catch (err) {
+    console.error('popup.css 로드 실패:', err);
+  }
+}
 
   // 팝업 컨테이너
   const popupContainer = document.createElement('div');
   popupContainer.id = 'popup-container';
-  
-  //터치 이벤트 통과
-  //popupContainer.style.pointerEvents = 'none';
+
 
   // 팝업 내부 클릭은 버블링 막기
 popupContainer.addEventListener('click', (e) => {
