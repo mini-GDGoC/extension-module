@@ -1,71 +1,122 @@
+// components/WavRecorder.tsx 수정 버전
+
 import { useRef, useState, useEffect } from 'react';
 
-export default function WavRecorder({ onRecorded }: { onRecorded?: (blob: Blob) => void }) {
+interface WavRecorderProps {
+  onRecorded?: (blob: Blob) => void;
+  autoStart?: boolean; // 자동 시작 여부 제어
+  startDelay?: number; // 시작 지연 시간 (ms)
+  recordingDuration?: number; // 녹음 시간 (ms)
+}
+
+export default function WavRecorder({ 
+  onRecorded, 
+  autoStart = true, 
+  startDelay = 0,
+  recordingDuration = 10000 
+}: WavRecorderProps) {
   const [recording, setRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
 
-  // wav 타입으로 녹음
   const startRecording = async () => {
     setRecording(true);
     setAudioUrl(null);
+    setCountdown(null);
     audioChunks.current = [];
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-    mediaRecorderRef.current = mediaRecorder;
+      mediaRecorderRef.current = mediaRecorder;
 
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) audioChunks.current.push(event.data);
-    };
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunks.current.push(event.data);
+      };
 
-    mediaRecorder.onstop = async () => {
-      // webm -> wav 변환 (간단히 webm 파일로 저장, wav 변환은 서버에서 하거나 추가 작업 필요)
-        // 1) 녹음된 청크(조각)들을 합쳐서 Blob 객체로 만든다
-      const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        // 2) Blob 으로부터 브라우저가 재생·다운로드할 수 있는 URL 생성
-      setAudioUrl(URL.createObjectURL(blob));
-        // 3) 마이크 스트림(트랙)을 완전히 닫아서 리소스 해제
-      stream.getTracks().forEach((track) => track.stop());
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        setAudioUrl(URL.createObjectURL(blob));
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+
+        if (onRecorded) onRecorded(blob);
+
+        // 자동 다운로드
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = 'recorded_audio.webm';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+
+      mediaRecorder.start();
+
+      // 설정된 시간 후 자동 정지
+      setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, recordingDuration);
+    } catch (error) {
+      console.error('녹음 시작 실패:', error);
       setRecording(false);
-
-          if (onRecorded) onRecorded(blob);  // ← 콜백으로 녹음된 Blob 전달
-
-          // ✅ 자동 다운로드 추가
-  const downloadLink = document.createElement('a');
-  downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = 'recorded_audio.webm';
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-    };
-
-    mediaRecorder.start();
-
-    // 3초 후 자동 정지
-    setTimeout(() => {
-      mediaRecorder.stop();
-    }, 10000);
+    }
   };
-// **2. mount 시 자동으로 녹음 시작**
-  useEffect(() => {
-    startRecording();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // **3. 버튼(직접 녹음)은 더이상 필요 없다면 삭제 가능!**
-  // 만약 버튼도 유지하려면 남겨도 됨
+  useEffect(() => {
+    if (autoStart && startDelay > 0) {
+      // 카운트다운 표시
+      let timeLeft = Math.ceil(startDelay / 1000);
+      setCountdown(timeLeft);
+      
+      const countdownInterval = setInterval(() => {
+        timeLeft -= 1;
+        setCountdown(timeLeft);
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          setCountdown(null);
+          startRecording();
+        }
+      }, 1000);
+
+      return () => clearInterval(countdownInterval);
+    } else if (autoStart && startDelay === 0) {
+      // 지연 없이 바로 시작
+      startRecording();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, startDelay]);
+
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center p-4">
+      {countdown !== null && (
+        <div className="text-lg font-semibold text-blue-600 mb-2">
+          녹음 시작까지 {countdown}초...
+        </div>
+      )}
+      
       <button
-        className={`px-4 py-2 rounded-md text-white ${recording ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+        className={`px-4 py-2 rounded-md text-white ${
+          recording ? 'bg-red-500' : 'bg-blue-500 hover:bg-blue-600'
+        } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={startRecording}
-        disabled={recording}
+        disabled={recording || countdown !== null}
       >
-        {recording ? '녹음 중...' : '3초간 녹음'}
+        {recording ? '녹음 중...' : countdown !== null ? '대기 중...' : '수동 녹음 시작'}
       </button>
+      
+      {recording && (
+        <div className="mt-2 text-sm text-gray-600">
+          🎤 음성을 녹음하고 있습니다...
+        </div>
+      )}
+      
       {audioUrl && (
         <audio controls src={audioUrl} className="mt-4" />
       )}

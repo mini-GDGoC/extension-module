@@ -83,6 +83,49 @@ async function createPopup() {
     e.stopPropagation();
   });
 
+// WavRecorder 렌더링 함수 (기존 코드 외부에 추가)
+function renderWavRecorder(delayMs: number = 0) {
+  // 기존 root가 있으면 제거
+  if (wavRoot) {
+    wavRoot.unmount();
+    wavRoot = null;
+  }
+  
+  // 새로운 div 생성
+  const wavDiv = document.createElement('div');
+  wavDiv.id = 'wavrecorder-wrap';
+  popupContainer.appendChild(wavDiv);
+
+  // React 렌더링 (개선된 WavRecorder 사용)
+  wavRoot = ReactDOM.createRoot(wavDiv);
+  wavRoot.render(
+    <WavRecorder
+      onRecorded={async (audioBlob) => {
+        // 서버에 바로 전송
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+        try {
+          const resp = await fetch(`${BASE_URL}/get_action`, {
+            method: 'POST',
+            body: formData,
+          });
+          const actionData = await resp.json();
+          console.log('/get_action 응답:', actionData);
+
+          // actionData에 따라 UI 업데이트
+          // ... (버튼 클릭/스크롤 처리 등)
+
+        } catch (e) {
+          console.error('/get_action 실패:', (e instanceof Error ? e.message : e));
+        }
+      }}
+      autoStart={true}
+      startDelay={delayMs}
+      recordingDuration={10000} // 10초간 녹음
+    />
+  );
+}
+
   // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
   function autoCapture() {
     // 팝업 안보이게 (필요시)
@@ -144,6 +187,24 @@ async function createPopup() {
               //오디오 재생 UI 숨기기
               audioElem.style.display = 'none';
               popupContainer.appendChild(audioElem);
+
+                // 3) 오디오 재생 완료 후 WavRecorder 시작
+              audio.addEventListener('ended', () => {
+                console.log('오디오 재생 완료, 1초 후 녹음 시작');
+                // 재생 완료 후 1초 여유를 두고 녹음 시작
+                setTimeout(() => {
+                  renderWavRecorder(0); // 바로 녹음 시작 (카운트다운 없음)
+                }, 1000);
+              });
+
+              // 오디오 재생 실패나 기타 문제 시 fallback (10초 후)
+              setTimeout(() => {
+                if (!document.getElementById('wavrecorder-wrap')) {
+                  console.log('Fallback: 10초 후 강제 녹음 시작');
+                  renderWavRecorder(0);
+                }
+              }, 10000);
+
             }
 
             // ==== [여기에 /get_action 호출 추가!] ====
@@ -153,39 +214,7 @@ async function createPopup() {
 
     // --- (1) React root를 생성하여 WavRecorder 렌더링 ---
     // root가 이미 있으면 제거
-    if (wavRoot) {
-      wavRoot.unmount();
-      wavRoot = null;
-    }
-    // 새로운 div 생성
-    const wavDiv = document.createElement('div');
-    wavDiv.id = 'wavrecorder-wrap';
-    popupContainer.appendChild(wavDiv);
-
-    // React 렌더링
-    wavRoot = ReactDOM.createRoot(wavDiv);
-    wavRoot.render(
-      <WavRecorder
-        onRecorded={async (audioBlob) => {
-          // 서버에 바로 전송
-          const formData = new FormData();
-          formData.append('file', audioBlob, 'audio.webm');
-          try {
-            const resp = await fetch(`${BASE_URL}/get_action`, {
-              method: 'POST',
-              body: formData,
-            });
-            const actionData = await resp.json();
-            console.log('/get_action 응답:', actionData);
-
-            // actionData에 따라 UI 업데이트
-            // ... (버튼 클릭/스크롤 처리 등)
-
-          } catch (e) {
-            console.error('/get_action 실패:', (e instanceof Error ? e.message : e));          }
-        }}
-      />
-    );
+   
             
 
             // 이후에 choices, follow_up_question 등을 사용해서
