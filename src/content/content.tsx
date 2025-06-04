@@ -1,10 +1,14 @@
-// import ReactDOM from 'react-dom/client';
-// import WavRecorder from '../components/WavRecorder';
+import ReactDOM from 'react-dom/client';
+import WavRecorder from '../components/WavRecorder';
 // import playAudioBlob from './audioPlay';
+
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+// 파일 상단에
+let wavRoot: ReturnType<typeof ReactDOM.createRoot> | null = null;
 
 
 chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
@@ -130,15 +134,59 @@ async function createPopup() {
                 console.warn('자동 재생 실패:', err);
               });
 
-              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레이어)
+              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레 이어)
               const audioElem = document.createElement('audio');
               audioElem.src = data.tts_file;
               audioElem.controls = true;
               // audioElem.style.width = '100%';
               // audioElem.style.marginTop = '16px';
+
+              //오디오 재생 UI 숨기기
               audioElem.style.display = 'none';
               popupContainer.appendChild(audioElem);
             }
+
+            // ==== [여기에 /get_action 호출 추가!] ====
+             // ==== [여기서 WavRecorder 삽입!] ====
+    // React없이, shadow DOM 내부에 WavRecorder 렌더링 (간단 버전)
+    // WavRecorder를 일반 js에서 쓸 수 있게 변환 필요, 아니면 React root mount 사용
+
+    // --- (1) React root를 생성하여 WavRecorder 렌더링 ---
+    // root가 이미 있으면 제거
+    if (wavRoot) {
+      wavRoot.unmount();
+      wavRoot = null;
+    }
+    // 새로운 div 생성
+    const wavDiv = document.createElement('div');
+    wavDiv.id = 'wavrecorder-wrap';
+    popupContainer.appendChild(wavDiv);
+
+    // React 렌더링
+    wavRoot = ReactDOM.createRoot(wavDiv);
+    wavRoot.render(
+      <WavRecorder
+        onRecorded={async (audioBlob) => {
+          // 서버에 바로 전송
+          const formData = new FormData();
+          formData.append('file', audioBlob, 'audio.webm');
+          try {
+            const resp = await fetch(`${BASE_URL}/get_action`, {
+              method: 'POST',
+              body: formData,
+            });
+            const actionData = await resp.json();
+            console.log('/get_action 응답:', actionData);
+
+            // actionData에 따라 UI 업데이트
+            // ... (버튼 클릭/스크롤 처리 등)
+
+          } catch (e) {
+            console.error('/get_action 실패:', (e instanceof Error ? e.message : e));          }
+        }}
+      />
+    );
+            
 
             // 이후에 choices, follow_up_question 등을 사용해서
             // UI 업데이트 로직을 여기에 추가하면 됩니다.

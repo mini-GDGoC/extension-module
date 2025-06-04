@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
-export default function WavRecorder() {
+export default function WavRecorder({ onRecorded }: { onRecorded?: (blob: Blob) => void }) {
   const [recording, setRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -30,6 +30,16 @@ export default function WavRecorder() {
         // 3) 마이크 스트림(트랙)을 완전히 닫아서 리소스 해제
       stream.getTracks().forEach((track) => track.stop());
       setRecording(false);
+
+          if (onRecorded) onRecorded(blob);  // ← 콜백으로 녹음된 Blob 전달
+
+          // ✅ 자동 다운로드 추가
+  const downloadLink = document.createElement('a');
+  downloadLink.href = URL.createObjectURL(blob);
+  downloadLink.download = 'recorded_audio.webm';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
     };
 
     mediaRecorder.start();
@@ -37,9 +47,16 @@ export default function WavRecorder() {
     // 3초 후 자동 정지
     setTimeout(() => {
       mediaRecorder.stop();
-    }, 3000);
+    }, 10000);
   };
+// **2. mount 시 자동으로 녹음 시작**
+  useEffect(() => {
+    startRecording();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // **3. 버튼(직접 녹음)은 더이상 필요 없다면 삭제 가능!**
+  // 만약 버튼도 유지하려면 남겨도 됨
   return (
     <div className="flex flex-col items-center">
       <button
