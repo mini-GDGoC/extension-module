@@ -134,8 +134,9 @@ async function createPopup() {
               const audioElem = document.createElement('audio');
               audioElem.src = data.tts_file;
               audioElem.controls = true;
-              audioElem.style.width = '100%';
-              audioElem.style.marginTop = '16px';
+              // audioElem.style.width = '100%';
+              // audioElem.style.marginTop = '16px';
+              audioElem.style.display = 'none';
               popupContainer.appendChild(audioElem);
             }
 
