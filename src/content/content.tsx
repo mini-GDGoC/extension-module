@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import WavRecorder from '../components/WavRecorder';
 // import playAudioBlob from './audioPlay';
+import triggerCenterClickThrough from '../utils/triggerCenterClickThrough';
 
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
@@ -23,25 +24,6 @@ function togglePopup() {
   else createPopup();
 }
 
-function triggerCenterClickThrough() {
-  // 화면 중앙 좌표 계산
-  const x = window.innerWidth / 2;
-  const y = window.innerHeight / 2;
-
-  // 중앙 좌표에 클릭 이벤트 생성
-  const elem = document.elementFromPoint(x, y);
-  if (elem) {
-    // 마우스 이벤트(Click) 생성 및 전파
-    const event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y
-    });
-    elem.dispatchEvent(event);
-  }
-}
 
 // popup.css를 불러와 shadow root에 <style>로 삽입하는 함수
 async function loadPopupCSS(shadowRoot: ShadowRoot) {
@@ -121,7 +103,7 @@ function renderWavRecorder(delayMs: number = 0) {
       }}
       autoStart={true}
       startDelay={delayMs}
-      recordingDuration={10000} // 10초간 녹음
+      recordingDuration={8000} // 8초간 녹음
     />
   );
 }
@@ -197,25 +179,9 @@ function renderWavRecorder(delayMs: number = 0) {
                 }, 1000);
               });
 
-              // 오디오 재생 실패나 기타 문제 시 fallback (10초 후)
-              setTimeout(() => {
-                if (!document.getElementById('wavrecorder-wrap')) {
-                  console.log('Fallback: 10초 후 강제 녹음 시작');
-                  renderWavRecorder(0);
-                }
-              }, 10000);
 
             }
 
-            // ==== [여기에 /get_action 호출 추가!] ====
-             // ==== [여기서 WavRecorder 삽입!] ====
-    // React없이, shadow DOM 내부에 WavRecorder 렌더링 (간단 버전)
-    // WavRecorder를 일반 js에서 쓸 수 있게 변환 필요, 아니면 React root mount 사용
-
-    // --- (1) React root를 생성하여 WavRecorder 렌더링 ---
-    // root가 이미 있으면 제거
-   
-            
 
             // 이후에 choices, follow_up_question 등을 사용해서
             // UI 업데이트 로직을 여기에 추가하면 됩니다.
