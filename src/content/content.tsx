@@ -1,10 +1,15 @@
-// import ReactDOM from 'react-dom/client';
-// import WavRecorder from '../components/WavRecorder';
+import ReactDOM from 'react-dom/client';
+import WavRecorder from '../components/WavRecorder';
 // import playAudioBlob from './audioPlay';
+import triggerCenterClickThrough from '../utils/triggerCenterClickThrough';
+
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+// 파일 상단에
+let wavRoot: ReturnType<typeof ReactDOM.createRoot> | null = null;
 
 
 chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
@@ -19,25 +24,6 @@ function togglePopup() {
   else createPopup();
 }
 
-function triggerCenterClickThrough() {
-  // 화면 중앙 좌표 계산
-  const x = window.innerWidth / 2;
-  const y = window.innerHeight / 2;
-
-  // 중앙 좌표에 클릭 이벤트 생성
-  const elem = document.elementFromPoint(x, y);
-  if (elem) {
-    // 마우스 이벤트(Click) 생성 및 전파
-    const event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y
-    });
-    elem.dispatchEvent(event);
-  }
-}
 
 // popup.css를 불러와 shadow root에 <style>로 삽입하는 함수
 async function loadPopupCSS(shadowRoot: ShadowRoot) {
@@ -78,6 +64,49 @@ async function createPopup() {
   popupContainer.addEventListener('click', (e) => {
     e.stopPropagation();
   });
+
+// WavRecorder 렌더링 함수 (기존 코드 외부에 추가)
+function renderWavRecorder(delayMs: number = 0) {
+  // 기존 root가 있으면 제거
+  if (wavRoot) {
+    wavRoot.unmount();
+    wavRoot = null;
+  }
+  
+  // 새로운 div 생성
+  const wavDiv = document.createElement('div');
+  wavDiv.id = 'wavrecorder-wrap';
+  popupContainer.appendChild(wavDiv);
+
+  // React 렌더링 (개선된 WavRecorder 사용)
+  wavRoot = ReactDOM.createRoot(wavDiv);
+  wavRoot.render(
+    <WavRecorder
+      onRecorded={async (audioBlob) => {
+        // 서버에 바로 전송
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+        try {
+          const resp = await fetch(`${BASE_URL}/get_action`, {
+            method: 'POST',
+            body: formData,
+          });
+          const actionData = await resp.json();
+          console.log('/get_action 응답:', actionData);
+
+          // actionData에 따라 UI 업데이트
+          // ... (버튼 클릭/스크롤 처리 등)
+
+        } catch (e) {
+          console.error('/get_action 실패:', (e instanceof Error ? e.message : e));
+        }
+      }}
+      autoStart={true}
+      startDelay={delayMs}
+      recordingDuration={8000} // 8초간 녹음
+    />
+  );
+}
 
   // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
   function autoCapture() {
@@ -130,14 +159,29 @@ async function createPopup() {
                 console.warn('자동 재생 실패:', err);
               });
 
-              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레이어)
+              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레 이어)
               const audioElem = document.createElement('audio');
               audioElem.src = data.tts_file;
               audioElem.controls = true;
-              audioElem.style.width = '100%';
-              audioElem.style.marginTop = '16px';
+              // audioElem.style.width = '100%';
+              // audioElem.style.marginTop = '16px';
+
+              //오디오 재생 UI 숨기기
+              audioElem.style.display = 'none';
               popupContainer.appendChild(audioElem);
+
+                // 3) 오디오 재생 완료 후 WavRecorder 시작
+              audio.addEventListener('ended', () => {
+                console.log('오디오 재생 완료, 1초 후 녹음 시작');
+                // 재생 완료 후 1초 여유를 두고 녹음 시작
+                setTimeout(() => {
+                  renderWavRecorder(0); // 바로 녹음 시작 (카운트다운 없음)
+                }, 1000);
+              });
+
+
             }
+
 
             // 이후에 choices, follow_up_question 등을 사용해서
             // UI 업데이트 로직을 여기에 추가하면 됩니다.
