@@ -1,16 +1,20 @@
 import ReactDOM from 'react-dom/client';
-import WavRecorder from '../components/WavRecorder';
 // import playAudioBlob from './audioPlay';
 import triggerCenterClickThrough from '../utils/triggerCenterClickThrough';
-
+import { renderWavRecorder } from '../utils/renderWavRecorder';
+import { autoCapture } from '../utils/autoCapture';
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-// 파일 상단에
+
 let wavRoot: ReturnType<typeof ReactDOM.createRoot> | null = null;
 
+//autocapture을 분리하기 위해 사용하는 함수
+function setWavRoot(root: ReturnType<typeof ReactDOM.createRoot> | null) {
+  wavRoot = root;
+}
 
 chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
   if (request.action === 'togglePopup') {
@@ -65,138 +69,7 @@ async function createPopup() {
     e.stopPropagation();
   });
 
-// WavRecorder 렌더링 함수 (기존 코드 외부에 추가)
-function renderWavRecorder(delayMs: number = 0) {
-  // 기존 root가 있으면 제거
-  if (wavRoot) {
-    wavRoot.unmount();
-    wavRoot = null;
-  }
-  
-  // 새로운 div 생성
-  const wavDiv = document.createElement('div');
-  wavDiv.id = 'wavrecorder-wrap';
-  popupContainer.appendChild(wavDiv);
 
-  // React 렌더링 (개선된 WavRecorder 사용)
-  wavRoot = ReactDOM.createRoot(wavDiv);
-  wavRoot.render(
-    <WavRecorder
-      onRecorded={async (audioBlob) => {
-        // 서버에 바로 전송
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'audio.webm');
-        try {
-          const resp = await fetch(`${BASE_URL}/get_action`, {
-            method: 'POST',
-            body: formData,
-          });
-          const actionData = await resp.json();
-          console.log('/get_action 응답:', actionData);
-
-          // actionData에 따라 UI 업데이트
-          // ... (버튼 클릭/스크롤 처리 등)
-
-        } catch (e) {
-          console.error('/get_action 실패:', (e instanceof Error ? e.message : e));
-        }
-      }}
-      autoStart={true}
-      startDelay={delayMs}
-      recordingDuration={8000} // 8초간 녹음
-    />
-  );
-}
-
-  // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
-  function autoCapture() {
-    // 팝업 안보이게 (필요시)
-    popupContainer.style.opacity = '0';
-
-    setTimeout(() => {
-      chrome.runtime.sendMessage({ action: 'captureVisibleTab' }, (dataUrl) => {
-        popupContainer.style.opacity = '1';
-        if (dataUrl) {
-          // 1. dataUrl을 Blob(이미지)으로 변환
-          function dataURLtoBlob(dataurl: string) {
-            const arr = dataurl.split(',');
-            const mime = arr[0].match(/:(.*?);/)![1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-              u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], { type: mime });
-          }
-          const imgBlob = dataURLtoBlob(dataUrl);
-
-          // 2. FormData에 파일 추가
-          const formData = new FormData();
-          formData.append('file', imgBlob, 'screenshot.png');
-
-          // 3. fetch를 사용한 multipart/form-data 전송 (axios 대신)
-          fetch(`${BASE_URL}/get-question`, {
-            method: 'POST',
-            body: formData,
-            // Content-Type 헤더는 fetch가 자동으로 설정하므로 제거
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('서버 응답:', data);
-            // 여기서 UI 업데이트, 다음 단계 등 후처리!
-
-                        // ==============================
-            // ★ mp3 파일 재생 및 플레이어 추가 ★
-            // 서버 응답에 tts_file 속성이 있다면,
-            // 1) Audio 객체로 바로 재생
-            // 2) 화면에 <audio controls> 플레이어를 붙여서 사용자도 조작할 수 있도록 함
-            // ==============================
-            if (data.tts_file) {
-              // 1) Audio 객체 생성 후 자동 재생
-              const audio = new Audio(data.tts_file);
-              audio.play().catch(err => {
-                console.warn('자동 재생 실패:', err);
-              });
-
-              // 2) popupContainer 아래쪽에 audio 태그 추가 (컨트롤이 달린 플레 이어)
-              const audioElem = document.createElement('audio');
-              audioElem.src = data.tts_file;
-              audioElem.controls = true;
-              // audioElem.style.width = '100%';
-              // audioElem.style.marginTop = '16px';
-
-              //오디오 재생 UI 숨기기
-              audioElem.style.display = 'none';
-              popupContainer.appendChild(audioElem);
-
-                // 3) 오디오 재생 완료 후 WavRecorder 시작
-              audio.addEventListener('ended', () => {
-                console.log('오디오 재생 완료, 1초 후 녹음 시작');
-                // 재생 완료 후 1초 여유를 두고 녹음 시작
-                setTimeout(() => {
-                  renderWavRecorder(0); // 바로 녹음 시작 (카운트다운 없음)
-                }, 1000);
-              });
-
-
-            }
-
-
-            // 이후에 choices, follow_up_question 등을 사용해서
-            // UI 업데이트 로직을 여기에 추가하면 됩니다.
-            // 예시) 질문 다시 띄우기:
-            // popupContainer.innerHTML = `<p>${data.follow_up_question}</p>`;
-            // …
-          })
-          
-          .catch(error => {
-            console.error('업로드 실패:', error);
-          });
-        }
-      });
-    }, 500);
-  }
 
   // 첫 화면: 음성 안내 필요?
   showPrompt();
@@ -260,8 +133,19 @@ function renderWavRecorder(delayMs: number = 0) {
 
     // 화면 중앙에 클릭 이벤트 트리거
     triggerCenterClickThrough();
-    autoCapture();
-
+    
+    //캡처후 서버에 전송
+autoCapture({
+  popupContainer,
+  BASE_URL,
+  renderWavRecorder: () => renderWavRecorder({
+    popupContainer,
+    wavRoot,
+    setWavRoot,
+    BASE_URL,
+    delayMs: 0,
+  }),
+});
     // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
