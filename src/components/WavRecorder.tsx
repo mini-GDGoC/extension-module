@@ -46,12 +46,12 @@ export default function WavRecorder({
         if (onRecorded) onRecorded(blob);
 
         // 자동 다운로드
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = 'recorded_audio.webm';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // const downloadLink = document.createElement('a');
+        // downloadLink.href = URL.createObjectURL(blob);
+        // downloadLink.download = 'recorded_audio.webm';
+        // document.body.appendChild(downloadLink);
+        // downloadLink.click();
+        // document.body.removeChild(downloadLink);
       };
 
       mediaRecorder.start();
