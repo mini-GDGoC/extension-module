@@ -53,6 +53,21 @@ export function renderWavRecorder({
               }
             });
           }
+          else if (actionData.follow_up_question_url) {
+            const audio = new Audio(actionData.follow_up_question_url);
+            audio.play();
+            audio.addEventListener('ended', () => {
+              // 음성 재생 끝난 뒤 다시 renderWavRecorder를 재귀 호출
+             renderWavRecorder({
+               popupContainer,
+                wavRoot,
+                setWavRoot,
+                BASE_URL,
+                delayMs,
+                onAutoClickDone,
+              });
+            });
+          }
         } catch (e) {
           console.error('/get_action 실패:', (e instanceof Error ? e.message : e));
         }
