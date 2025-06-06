@@ -36,7 +36,7 @@ export function clickCoordinate(
 
 export function clickCoordinateScroll(
     bbox: { x: number; y: number; width: number; height: number },
-    ratio,
+    ratio: number,
     onClicked?: () => void) {
   const centerX = bbox.x * ratio + bbox.width / 2 * ratio;
   const centerY = bbox.y * ratio + bbox.height * ratio + bbox.height / 10 * ratio;
