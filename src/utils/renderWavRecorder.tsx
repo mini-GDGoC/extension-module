@@ -46,7 +46,7 @@ export function renderWavRecorder({
 
           if (actionData.action === 'click' && actionData.bbox) {
             // 클릭 후 바로 onAutoClickDone 호출
-            clickCoordinate(actionData.bbox, () => {
+            clickCoordinate(actionData.bbox, 1/2,() => {
               console.log('자동 클릭 완료!');
               if (typeof onAutoClickDone === 'function') {
                 onAutoClickDone();
