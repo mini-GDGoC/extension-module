@@ -1,7 +1,7 @@
 // utils/renderWavRecorder.tsx
 import ReactDOM from 'react-dom/client';
 import WavRecorder from '../components/WavRecorder';
-import { clickCoordinate } from './clickCoordinate';
+import {clickCoordinate, clickCoordinateScroll} from './clickCoordinate';
 
 type RenderWavRecorderArgs = {
   popupContainer: HTMLElement;
