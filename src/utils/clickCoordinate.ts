@@ -6,10 +6,11 @@
 // utils/clickCoordinate.ts
 export function clickCoordinate(
   bbox: { x: number; y: number; width: number; height: number },
+  ratio: number,
   onClicked?: () => void
 ) {
-  const centerX = bbox.x / 2 + bbox.width / 4;
-  const centerY = bbox.y / 2 + bbox.height / 4;
+  const centerX = bbox.x * ratio + bbox.width / 2 * ratio;
+  const centerY = bbox.y * ratio + bbox.height / 2 * ratio;
 
   const clickEvent = new MouseEvent('click', {
     bubbles: true,
@@ -32,3 +33,31 @@ export function clickCoordinate(
   }
 }
 
+
+export function clickCoordinateScroll(
+    bbox: { x: number; y: number; width: number; height: number },
+    ratio,
+    onClicked?: () => void) {
+  const centerX = bbox.x * ratio + bbox.width / 2 * ratio;
+  const centerY = bbox.y * ratio + bbox.height * ratio + bbox.height / 10 * ratio;
+
+  const clickEvent = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    clientX: centerX,
+    clientY: centerY,
+    view: window,
+  });
+
+  const elem = document.elementFromPoint(centerX, centerY);
+  if (elem) {
+    elem.dispatchEvent(clickEvent);
+    if (typeof onClicked === 'function') {
+      onClicked();
+    }
+    return true;
+  } else {
+    console.warn('No element found at bbox center:', centerX, centerY);
+    return false;
+  }
+}
