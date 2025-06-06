@@ -33,6 +33,8 @@ export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: Aut
         const formData = new FormData();
         formData.append('file', imgBlob, 'screenshot.png');
           // 3. fetch를 사용한 multipart/form-data 전송 
+                  console.log("get-question 호출");
+
         fetch(`${BASE_URL}/get-question`, {
           method: 'POST',
           body: formData,

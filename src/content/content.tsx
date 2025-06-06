@@ -123,6 +123,34 @@ async function createPopup() {
     popupContainer.appendChild(buttonWrap);
   }
 
+  function whichMenu() {
+        // DOM 초기화
+    popupContainer.innerHTML = '';
+
+    console.log("autocapture 시작");
+
+   // 약간의 지연을 두고 autoCapture 실행
+    setTimeout(() => {
+      autoCapture({
+        popupContainer,
+        BASE_URL,
+        renderWavRecorder: () => renderWavRecorder({
+          popupContainer,
+          wavRoot,
+          setWavRoot,
+          BASE_URL,
+          delayMs: 0,
+        }),
+      });
+    }, 200); 
+
+    // 타이틀
+    const title = document.createElement('h2');
+    title.textContent = '어떤 메뉴를 드시겠어요?';
+    popupContainer.appendChild(title);
+
+  }
+
   function askTakeOut() {
     popupContainer.innerHTML = '';
 
@@ -135,17 +163,26 @@ async function createPopup() {
     triggerCenterClickThrough();
     
     //캡처후 서버에 전송
-autoCapture({
-  popupContainer,
-  BASE_URL,
-  renderWavRecorder: () => renderWavRecorder({
+  autoCapture({
     popupContainer,
-    wavRoot,
-    setWavRoot,
     BASE_URL,
-    delayMs: 0,
-  }),
-});
+    renderWavRecorder: () => {
+      renderWavRecorder({
+        popupContainer,
+        wavRoot,
+        setWavRoot,
+        BASE_URL,
+        delayMs: 0,
+        // ← 여기 onAutoClickDone으로 두 번째 함수를 넘겨준다
+        onAutoClickDone: () => {
+          console.log('첫 번째 클릭이 끝났으므로, 다음 함수를 실행합니다.');
+          // 예를 들어 두 번째 autoCapture나, 다른 로직을 이곳에 호출
+          whichMenu();
+        },
+      });
+    },
+  });
+
     // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
