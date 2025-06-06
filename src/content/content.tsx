@@ -1,5 +1,6 @@
+
+//content.tsx
 import ReactDOM from 'react-dom/client';
-// import playAudioBlob from './audioPlay';
 import triggerCenterClickThrough from '../utils/triggerCenterClickThrough';
 import { renderWavRecorder } from '../utils/renderWavRecorder';
 import { autoCapture } from '../utils/autoCapture';
@@ -140,6 +141,12 @@ async function createPopup() {
           setWavRoot,
           BASE_URL,
           delayMs: 0,
+          onAutoClickDone: () => {
+              console.log('음식 메뉴 묻기(어떤버거인지).');
+              whichMenu();
+
+          }
+
         }),
       });
     }, 200); 

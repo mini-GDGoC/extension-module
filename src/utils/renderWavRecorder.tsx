@@ -53,6 +53,7 @@ export function renderWavRecorder({
               }
             });
           }
+
         } catch (e) {
           console.error('/get_action 실패:', (e instanceof Error ? e.message : e));
         }
