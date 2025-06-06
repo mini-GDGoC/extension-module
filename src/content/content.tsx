@@ -127,13 +127,7 @@ async function createPopup() {
         // DOM 초기화
     popupContainer.innerHTML = '';
 
-    // 기존 오디오 요소들 정리 (전역 스코프에서도)
-    const allAudios = document.querySelectorAll('audio');
-    allAudios.forEach(audio => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.remove();
-    });
+    console.log("autocapture 시작");
 
    // 약간의 지연을 두고 autoCapture 실행
     setTimeout(() => {
