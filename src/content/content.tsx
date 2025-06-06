@@ -4,11 +4,12 @@ import ReactDOM from 'react-dom/client';
 import triggerCenterClickThrough from '../utils/triggerCenterClickThrough';
 import { renderWavRecorder } from '../utils/renderWavRecorder';
 import { autoCapture } from '../utils/autoCapture';
+import { setOverlayOpen } from '../state/overlayState';
+
 
 console.log('손길도우미 확장프로그램이 로드되었습니다.');
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
 
 let wavRoot: ReturnType<typeof ReactDOM.createRoot> | null = null;
 
@@ -45,6 +46,10 @@ async function loadPopupCSS(shadowRoot: ShadowRoot) {
 }
 
 async function createPopup() {
+
+  // 오버레이 열 때
+  setOverlayOpen(true);
+
   // 오버레이 생성
   const overlay = document.createElement('div');
   overlay.id = 'extension-popup-overlay';
@@ -231,6 +236,9 @@ async function createPopup() {
   // ESC 닫기
   const escHandler = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
+      // 오버레이가 닫혔으므로 플래그를 false로
+      // 오버레이 닫을 때(ESC/클릭)
+      setOverlayOpen(false);
       overlay.remove();
       document.removeEventListener('keydown', escHandler);
     }

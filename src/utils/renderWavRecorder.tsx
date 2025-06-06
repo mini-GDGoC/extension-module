@@ -2,6 +2,8 @@
 import ReactDOM from 'react-dom/client';
 import WavRecorder from '../components/WavRecorder';
 import { clickCoordinate } from './clickCoordinate';
+import { isOverlayOpen } from '../state/overlayState';
+
 
 type RenderWavRecorderArgs = {
   popupContainer: HTMLElement;
@@ -36,6 +38,10 @@ export function renderWavRecorder({
       onRecorded={async (audioBlob) => {
         const formData = new FormData();
         formData.append('file', audioBlob, 'audio.webm');
+
+         // 1) 오버레이가 닫혔으면 즉시 중단
+        if (!isOverlayOpen()) return;
+
         try {
           const resp = await fetch(`${BASE_URL}/get_action`, {
             method: 'POST',
@@ -43,6 +49,9 @@ export function renderWavRecorder({
           });
           const actionData = await resp.json();
           console.log('/get_action 응답:', actionData);
+          // 2) /get_action 응답 후에도 오버레이가 닫혔으면 중단
+          if (!isOverlayOpen()) return;
+
 
           if (actionData.action === 'click' && actionData.bbox) {
             // 클릭 후 바로 onAutoClickDone 호출
