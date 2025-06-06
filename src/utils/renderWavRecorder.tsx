@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client';
 import WavRecorder from '../components/WavRecorder';
-import { clickCoordinate } from './clickCoordinate';
+import {clickCoordinate, clickCoordinateScrollBar} from './clickCoordinate';
 
 // WavRecorder 렌더링 함수 (기존 코드 외부에 추가)
 
@@ -50,6 +50,21 @@ export function renderWavRecorder({
               if (actionData.action === 'click' && actionData.bbox) {
                 clickCoordinate(actionData.bbox);
                 console.log('화면 클릭');
+              } else if (actionData.action === 'scroll' && actionData.bbox) {
+                  //이렇게 하면 스크롤 바를 클릭 하는거라서 스크롤바 밑을 클릭 하는 로직을 만들어야 함
+                  clickCoordinateScrollBar(actionData.bbox, 1/2); // 나중에 ratio 값 조정 해야 함 지금은 호인이 컴퓨터에 맞게 1/2로 함 brower_max-size/picture_max_size
+              } else {
+                  //추가 질문이 들어온 경우
+                  console.log('get_action 응답에서 팔로우업 퀘스쳔이 들어옴');
+                    // 팔로우업 질문이 있는 경우, WavRecorder를 다시 렌더링
+                  /*
+                {
+                    "follow_up_question_url": obj_url,
+                    "choices": [],
+                    "user_answer": user_answer,
+                }
+                  * */
+
               }
 
             // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑

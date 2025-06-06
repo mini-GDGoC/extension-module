@@ -135,17 +135,17 @@ async function createPopup() {
     triggerCenterClickThrough();
     
     //캡처후 서버에 전송
-autoCapture({
-  popupContainer,
-  BASE_URL,
-  renderWavRecorder: () => renderWavRecorder({
-    popupContainer,
-    wavRoot,
-    setWavRoot,
-    BASE_URL,
-    delayMs: 0,
-  }),
-});
+    autoCapture({
+      popupContainer,
+      BASE_URL,
+      renderWavRecorder: () => renderWavRecorder({
+        popupContainer,
+        wavRoot,
+        setWavRoot,
+        BASE_URL,
+        delayMs: 0,
+      }),
+    });
     // 타이틀
     const title = document.createElement('h2');
     title.textContent = '손길도우미';
