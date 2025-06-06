@@ -42,10 +42,18 @@ export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: Aut
           .then(response => response.json())
           .then(data => {
             console.log('서버 응답:', data);
+
+              popupContainer.querySelectorAll('audio').forEach(audioElem => {
+              try { audioElem.pause(); } catch(e) {}
+              audioElem.remove();
+            });
             if (data.tts_file) {
-              const audio = new Audio(data.tts_file);
-              audio.play().catch(err => {
-                console.warn('자동 재생 실패:', err);
+    const audio = new Audio(data.tts_file);
+    audio.currentTime = 0;
+    audio.play()
+      .then(() => console.log('새 TTS 파일 재생 성공:', data.tts_file))
+      .catch(err => {
+        console.warn('새 TTS 파일 재생 실패:', err);
               });
 
               const audioElem = document.createElement('audio');
