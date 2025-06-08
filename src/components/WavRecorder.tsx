@@ -44,14 +44,6 @@ export default function WavRecorder({
         setRecording(false);
 
         if (onRecorded) onRecorded(blob);
-
-        // 자동 다운로드
-        // const downloadLink = document.createElement('a');
-        // downloadLink.href = URL.createObjectURL(blob);
-        // downloadLink.download = 'recorded_audio.webm';
-        // document.body.appendChild(downloadLink);
-        // downloadLink.click();
-        // document.body.removeChild(downloadLink);
       };
 
       mediaRecorder.start();
@@ -101,7 +93,7 @@ export default function WavRecorder({
         </div>
       )}
       
-      <button
+      {/* <button
         className={`px-4 py-2 rounded-md text-white ${
           recording ? 'bg-red-500' : 'bg-blue-500 hover:bg-blue-600'
         } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -109,7 +101,19 @@ export default function WavRecorder({
         disabled={recording || countdown !== null}
       >
         {recording ? '녹음 중...' : countdown !== null ? '대기 중...' : '수동 녹음 시작'}
-      </button>
+      </button> */}
+      {!(autoStart && !recording && audioUrl) && (
+  <button
+    onClick={startRecording}
+    disabled={recording || countdown !== null}
+    className={`px-4 py-2 rounded-md text-white ${
+      recording ? 'bg-red-500' : 'bg-blue-500 hover:bg-blue-600'
+    } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+  >
+    {recording ? '녹음 중...' : countdown !== null ? '대기 중...' : ''}
+  </button>
+)}
+
       
       {recording && (
         <div className="mt-2 text-sm text-gray-600">
@@ -117,9 +121,9 @@ export default function WavRecorder({
         </div>
       )}
       
-      {audioUrl && (
+      {/* {audioUrl && (
         <audio controls src={audioUrl} className="mt-4" />
-      )}
+      )} */}
     </div>
   );
 }

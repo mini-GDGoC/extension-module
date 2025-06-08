@@ -63,6 +63,11 @@ export function renderWavRecorder({
             });
           }
           else if (actionData.follow_up_question_url) {
+              //if (data.follow_up_question) {
+              const titleElem = popupContainer.querySelector('h2');
+              if (titleElem) titleElem.textContent = actionData.follow_up_question;
+            //}
+            console.log("title 변경 완료");
             const audio = new Audio(actionData.follow_up_question_url);
             audio.play();
             audio.addEventListener('ended', () => {

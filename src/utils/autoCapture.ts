@@ -43,6 +43,12 @@ export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: Aut
           .then(response => response.json())
           .then(data => {
             console.log('서버 응답:', data);
+            if (data.follow_up_question) {
+              const titleElem = popupContainer.querySelector('h2');
+              if (titleElem) titleElem.textContent = data.follow_up_question;
+            }
+            console.log("title 변경 완료");
+
 
              // 1. action: "click" 응답이면 세트음료 선택
             if (data.action === 'click' && data.bbox) {
