@@ -158,7 +158,7 @@ async function createPopup() {
 
     // 타이틀
     const title = document.createElement('h2');
-    title.textContent = '어떤 메뉴를 드시겠어요?';
+    title.textContent = '질문을 불러오는 중입니다';
     popupContainer.appendChild(title);
 
   }
