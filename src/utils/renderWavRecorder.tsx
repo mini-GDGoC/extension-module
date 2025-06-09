@@ -64,9 +64,35 @@ export function renderWavRecorder({
           }
           else if (actionData.follow_up_question_url) {
               //if (data.follow_up_question) {
+              //타이틀 변경
               const titleElem = popupContainer.querySelector('h2');
               if (titleElem) titleElem.textContent = actionData.follow_up_question;
             //}
+
+                        // ------ 여기부터 추가 ------
+            // choices가 존재하면 리스트 추가
+            if (Array.isArray(actionData.choices) && actionData.choices.length > 0) {
+              // 이미 있는 리스트 있으면 제거
+              const oldList = popupContainer.querySelector('ul.choices-list');
+              if (oldList) oldList.remove();
+              // 새 리스트 생성
+              const listElem = document.createElement('ul');
+              listElem.className = 'choices-list';
+              listElem.style.margin = '18px 0 0 0';
+              listElem.style.padding = '0 0 0 16px';
+              listElem.style.fontSize = '18px';
+              listElem.style.color = '#222';
+              listElem.style.listStyle = 'disc';
+              for (const c of actionData.choices) {
+                const li = document.createElement('li');
+                li.textContent = c;
+                li.style.margin = '8px 0';
+                listElem.appendChild(li);
+              }
+              // 타이틀(h2) 아래에 붙이기
+              if (titleElem) titleElem.insertAdjacentElement('afterend', listElem);
+              else popupContainer.appendChild(listElem);
+            }
             console.log("title 변경 완료");
             const audio = new Audio(actionData.follow_up_question_url);
             audio.play();
