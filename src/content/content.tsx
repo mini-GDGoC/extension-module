@@ -200,32 +200,32 @@ async function createPopup() {
 
     // 타이틀
     const title = document.createElement('h2');
-    title.textContent = '손길도우미';
+    title.textContent = '질문을 불러오는 중입니다';
     
-    // 버튼 그룹
-    const buttonWrap = document.createElement('div');
-    buttonWrap.style.display = 'flex';
-    buttonWrap.style.justifyContent = 'center';
-    buttonWrap.style.marginTop = '28px';
-    buttonWrap.style.gap = '16px';
+    // // 버튼 그룹
+    // const buttonWrap = document.createElement('div');
+    // buttonWrap.style.display = 'flex';
+    // buttonWrap.style.justifyContent = 'center';
+    // buttonWrap.style.marginTop = '28px';
+    // buttonWrap.style.gap = '16px';
 
-    // 포장 버튼
-    const needBtn = document.createElement('button');
-    needBtn.textContent = '포장해가요';
-    needBtn.style.cssText =
-      'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
+    // // 포장 버튼
+    // const needBtn = document.createElement('button');
+    // needBtn.textContent = '포장해가요';
+    // needBtn.style.cssText =
+    //   'padding:12px 32px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
 
-    // 먹고가요 버튼
-    const nopeBtn = document.createElement('button');
-    nopeBtn.textContent = '먹고가요';
-    nopeBtn.style.cssText =
-      'padding:12px 32px;background:#E5E7EB;color:#4B5563;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
+    // // 먹고가요 버튼
+    // const nopeBtn = document.createElement('button');
+    // nopeBtn.textContent = '먹고가요';
+    // nopeBtn.style.cssText =
+    //   'padding:12px 32px;background:#E5E7EB;color:#4B5563;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:600;white-space:nowrap;';
 
-    buttonWrap.appendChild(needBtn);
-    buttonWrap.appendChild(nopeBtn);
+    // buttonWrap.appendChild(needBtn);
+    // buttonWrap.appendChild(nopeBtn);
 
     popupContainer.appendChild(title);
-    popupContainer.appendChild(buttonWrap);
+    //popupContainer.appendChild(buttonWrap);
   }
 
   shadow.appendChild(popupContainer);
