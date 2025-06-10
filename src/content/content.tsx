@@ -92,12 +92,15 @@ async function createPopup() {
     closeButton.onclick = () => overlay.remove();
 
     // 타이틀
-    const title = document.createElement('h2');
+    const title = document.createElement('h1');
     title.textContent = '손길도우미';
+    title.style.cssText = 'width: 100%; text-align: center; margin-top: 5vh;';
 
     // 질문
     const question = document.createElement('p');
     question.textContent = '음성 안내가 필요하신가요?';
+    question.style.cssText =
+      'text-align: center; font-size: 25px; margin-top: 9px;';
 
     // 버튼 그룹
     const buttonWrap = document.createElement('div');
