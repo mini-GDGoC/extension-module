@@ -49,8 +49,29 @@ export function renderWavRecorder({
           });
           const actionData = await resp.json();
           console.log('/get_action 응답:', actionData);
+
           // 2) /get_action 응답 후에도 오버레이가 닫혔으면 중단
           if (!isOverlayOpen()) return;
+
+          // 505 에러면 재시도 (LLM 오류)
+          if (actionData.status === 505) {
+            try {
+              const retryResp = await fetch(`${BASE_URL}/get_action`, {
+                method: 'POST',
+                body: formData,
+              });
+              const retryData = await retryResp.json();
+              console.log('/get_action 재시도 응답:', retryData);
+
+              // 재시도 후에도 오버레이가 닫혔으면 중단
+              if (!isOverlayOpen()) return;
+
+              Object.assign(actionData, retryData); // 이후 로직에서 재시도 결과 사용
+            } catch (retryErr) {
+              console.error('/get_action 재시도 실패:', (retryErr instanceof Error ? retryErr.message : retryErr));
+              return;
+            }
+          }
 
 
           if (actionData.action === 'click' && actionData.bbox) {
@@ -69,7 +90,7 @@ export function renderWavRecorder({
               if (titleElem) titleElem.textContent = actionData.follow_up_question;
             //}
 
-                        // ------ 여기부터 추가 ------
+            // ------------
             // choices가 존재하면 리스트 추가
             if (Array.isArray(actionData.choices) && actionData.choices.length > 0) {
               // 이미 있는 리스트 있으면 제거
