@@ -93,15 +93,7 @@ export default function WavRecorder({
         </div>
       )}
       
-      {/* <button
-        className={`px-4 py-2 rounded-md text-white ${
-          recording ? 'bg-red-500' : 'bg-blue-500 hover:bg-blue-600'
-        } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={startRecording}
-        disabled={recording || countdown !== null}
-      >
-        {recording ? '녹음 중...' : countdown !== null ? '대기 중...' : '수동 녹음 시작'}
-      </button> */}
+
       {!(autoStart && !recording && audioUrl) && (
   <button
     onClick={startRecording}
