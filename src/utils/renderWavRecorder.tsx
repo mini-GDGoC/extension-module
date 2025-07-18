@@ -135,7 +135,7 @@ export function renderWavRecorder({
       }}
       autoStart={true}
       startDelay={delayMs}
-      recordingDuration={6500}
+      recordingDuration={6200}
     />
   );
 }
