@@ -1,6 +1,7 @@
 // utils/autoCapture.ts
 import { clickCoordinate } from './clickCoordinate';
 
+import { getSessionID } from './session'; //session ID 가져오기
 
 type AutoCaptureArgs = {
   popupContainer: HTMLElement;
@@ -33,6 +34,8 @@ export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: Aut
 
         const formData = new FormData();
         formData.append('file', imgBlob, 'screenshot.png');
+        formData.append('session_id', getSessionID()); // session_id 추가
+
           // 3. fetch를 사용한 multipart/form-data 전송 
                   console.log("get-question 호출");
 

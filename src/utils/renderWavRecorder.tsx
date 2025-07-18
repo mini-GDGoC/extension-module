@@ -4,6 +4,9 @@ import WavRecorder from '../components/WavRecorder';
 import { clickCoordinate } from './clickCoordinate';
 import { isOverlayOpen } from '../state/overlayState';
 
+import { getSessionID } from './session'; //session ID 가져오기
+
+
 
 type RenderWavRecorderArgs = {
   popupContainer: HTMLElement;
@@ -38,6 +41,9 @@ export function renderWavRecorder({
       onRecorded={async (audioBlob) => {
         const formData = new FormData();
         formData.append('file', audioBlob, 'audio.webm');
+        
+        formData.append('session_id', getSessionID()); // session_id 추가
+
 
          // 1) 오버레이가 닫혔으면 즉시 중단
         if (!isOverlayOpen()) return;

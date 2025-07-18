@@ -4,6 +4,7 @@ let sessionID: string | null = null;
 
 // 세션 ID를 생성 (UUID)
 export function generateSessionID(): string {
+    //브라우저 환경에서 crypto.randomUUID가 지원되면ㅊ
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
