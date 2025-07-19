@@ -28,3 +28,8 @@ pnpm install
    
 ### 4. 확장프로그램 등록 완료
 <img width="1092" height="519" alt="image" src="https://github.com/user-attachments/assets/ace7c1de-86c2-48f3-9c8b-0ccf001ee59d" />
+
+### 5. 디지털 배움터 웹사이트에서 손길도우미 실행
+https://www.xn--2z1bw8k1pjz5ccumkb.kr/trigit/2023/simulation/06/05/index.html
+
+<img width="1082" height="1177" alt="image" src="https://github.com/user-attachments/assets/719dc6b1-0e2d-410c-bf3b-82c10a09ece5" />
