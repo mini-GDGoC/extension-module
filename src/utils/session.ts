@@ -1,5 +1,5 @@
 // utils/session.ts
-
+//session ID 관리
 let sessionID: string | null = null;
 
 // 세션 ID를 생성 (UUID)
