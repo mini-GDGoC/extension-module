@@ -20,7 +20,7 @@ pnpm install
 ### 1. 크롬을 실행해서 확장프로그램 화면으로 이동합니다.
 <img width="1095" height="465" alt="image" src="https://github.com/user-attachments/assets/9ec684ff-c4a2-4151-aea0-49a9b8d528f6" />
 
-### 2. 개발자 모드 토글 ON, “압축해제된 확장 프로그램 로드합니다” 버튼을 클릭합니다.
+### 2. 개발자 모드 토글 ON, “압축해제된 확장 프로그램 로드” 버튼을 클릭합니다.
 <img width="1091" height="417" alt="image" src="https://github.com/user-attachments/assets/e93a0cd5-1386-41de-a2a1-fc1130bcebba" />
 
 ### 3. dist 폴더경로를 선택합니다. (extension-module/dist)
