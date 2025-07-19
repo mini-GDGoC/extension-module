@@ -27,4 +27,4 @@ pnpm install
    <img width="695" height="461" alt="image" src="https://github.com/user-attachments/assets/2b7c7968-3a19-4367-af3e-940dc14bd18a" />
    
 ### 4. 확장프로그램 등록 완료
-<img width="1095" height="585" alt="image" src="https://github.com/user-attachments/assets/78cb6b26-d3d5-4e90-8042-bad22bb51921" />
+<img width="1092" height="519" alt="image" src="https://github.com/user-attachments/assets/ace7c1de-86c2-48f3-9c8b-0ccf001ee59d" />
