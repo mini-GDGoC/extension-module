@@ -15,14 +15,16 @@
 pnpm install
 
 
-## 확장 프로그램 실행 가이드
+# 확장 프로그램 실행 가이드
 
+### 1. 크롬을 실행해서 확장프로그램 화면으로 이동합니다.
 <img width="1095" height="465" alt="image" src="https://github.com/user-attachments/assets/9ec684ff-c4a2-4151-aea0-49a9b8d528f6" />
 
-### 1. 개발자 모드 ON, 크롬 확장프로그램 페이지로 가서 “압축해제된 확장 프로그램 로드합니다” 클릭
+### 2. 개발자 모드 ON, 크롬 확장프로그램 페이지로 가서 “압축해제된 확장 프로그램 로드합니다” 클릭
 <img width="1091" height="417" alt="image" src="https://github.com/user-attachments/assets/e93a0cd5-1386-41de-a2a1-fc1130bcebba" />
 
-### 2. dist 폴더경로 선택 (extension-module/dist)
+### 3. dist 폴더경로 선택 (extension-module/dist)
    <img width="695" height="461" alt="image" src="https://github.com/user-attachments/assets/2b7c7968-3a19-4367-af3e-940dc14bd18a" />
-### 3. 확장프로그램 등록 완료
+   
+### 4. 확장프로그램 등록 완료
 <img width="1095" height="585" alt="image" src="https://github.com/user-attachments/assets/78cb6b26-d3d5-4e90-8042-bad22bb51921" />
