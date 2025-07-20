@@ -71,8 +71,8 @@ pnpm install
 https://www.xn--2z1bw8k1pjz5ccumkb.kr/trigit/2023/simulation/06/05/index.html
 
 <img width="1082" height="1177" alt="image" src="https://github.com/user-attachments/assets/719dc6b1-0e2d-410c-bf3b-82c10a09ece5" />
-
+&nbsp;&nbsp;
 ※손길 도우미는 사용자가 원하는 상품을 담아서 결제하기 직전까지의 상황을 지원합니다
-<img width="561" height="810" alt="image" src="https://github.com/user-attachments/assets/429cae69-f69a-4bfe-9b5e-f7983282cf04" />
+<img width="561" height="810" alt="image" src="https://github.com/user-attachments/assets/429cae69-f69a-4bfe-9b5e-f7983282cf04" />   
 사용자의 발화 지연을 고려하여, 실제 음성 인식은 음성 녹음 버튼이 활성화된 후 약 0.5초가 지난 후 시작됩니다.
 
