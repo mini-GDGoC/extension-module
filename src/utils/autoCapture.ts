@@ -10,6 +10,19 @@ type AutoCaptureArgs = {
 };
   // 자동 캡처 함수 - createPopup 내부에서 정의하여 popupContainer에 접근 가능
 
+  //동적으로 화면 비율 계산
+function getScreenToViewportRatio(): number {
+  // 실제 화면 해상도 (물리적 픽셀)
+  const screenWidth = window.screen.width;
+  // 뷰포트 크기 (CSS 픽셀)
+  const viewportWidth = window.innerWidth;
+  
+  const ratio = viewportWidth / screenWidth;
+  console.log(`Screen width: ${screenWidth}, Viewport width: ${viewportWidth}, Ratio: ${ratio}`);
+  
+  return ratio;
+}
+
 export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: AutoCaptureArgs) {
   popupContainer.style.opacity = '0';
 
@@ -80,9 +93,11 @@ export function autoCapture({ popupContainer, BASE_URL, renderWavRecorder }: Aut
              // 1. action: "click" 응답이면 세트음료 선택
             if (data.action === 'click' && data.bbox) {
               // clickCoordinate 함수는 기존에 구현된 함수
+              // 동적으로 화면 비율 계산 (기존: 하드코딩된 1/2)
+              const ratio = getScreenToViewportRatio();
               console.log("세트음료 선택");
               console.log(data.bbox.x,data.bbox.y,data.bbox.width,data.bbox.height);
-              clickCoordinate(data.bbox, 1/2, () => {
+              clickCoordinate(data.bbox, ratio, () => {
                 // 클릭 완료 후, 다시 autoCapture 재호출 (재귀)
                 autoCapture({ popupContainer, BASE_URL, renderWavRecorder });
               });
