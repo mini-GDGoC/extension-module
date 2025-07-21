@@ -17,6 +17,11 @@ pnpm install
 
 # 확장 프로그램 실행 가이드
 
+### 0. EXTENSION-MODULE 폴더에 .env 를 생성해서 VITE_API_BASE_URL=https://capstone.newdongjun.com 를 입력합니다.
+
+<img width="800" height="392" alt="image" src="https://github.com/user-attachments/assets/6ca8c409-29ec-4c05-8c55-dfb1616db4a7" />
+
+
 ### 1. 크롬을 실행해서 확장프로그램 화면으로 이동합니다.
 <img width="1095" height="465" alt="image" src="https://github.com/user-attachments/assets/9ec684ff-c4a2-4151-aea0-49a9b8d528f6" />
 
@@ -28,6 +33,7 @@ pnpm install
 pnpm run build
 ```
 빌드를 해서 실행 파일을 만들고 이는 dist 디렉토리에 생성 됩니다.
+
 
 ### 4. dist 폴더경로를 선택합니다. (extension-module/dist)
    <img width="695" height="461" alt="image" src="https://github.com/user-attachments/assets/2b7c7968-3a19-4367-af3e-940dc14bd18a" />
